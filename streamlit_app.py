@@ -1,4 +1,4 @@
-# app.py
+# streamlit_app.py
 import streamlit as st
 from bs4 import BeautifulSoup
 import requests
@@ -9,18 +9,32 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
 
-# Download necessary NLTK data
-nltk.download('punkt')
-nltk.download('stopwords')
+# Function to download NLTK data
+@st.cache_resource
+def download_nltk_data():
+    try:
+        nltk.data.find('tokenizers/punkt')
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('punkt')
+        nltk.download('stopwords')
+
+# Call the function to download NLTK data
+download_nltk_data()
 
 # Initialize session state
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
 def fetch_website_content(url):
-    response = requests.get(url)
-    soup = BeautifulSoup(response.content, 'html.parser')
-    return soup.get_text()
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Raises an HTTPError for bad responses
+        soup = BeautifulSoup(response.content, 'html.parser')
+        return soup.get_text()
+    except requests.RequestException as e:
+        st.error(f"Error fetching website content: {e}")
+        return ""
 
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
@@ -39,30 +53,34 @@ def generate_response(query, relevant_content):
     # For this example, we'll just return the most relevant content
     return "\n\n".join(relevant_content)
 
-# Fetch and preprocess website content
-url = "https://micor.agriculture.gov.au/"
-raw_content = fetch_website_content(url)
-paragraphs = [p for p in raw_content.split('\n') if p.strip()]
-processed_paragraphs = [preprocess_text(p) for p in paragraphs]
-
 # Streamlit UI
 st.title("MicorBot - Chat with MICOR Website")
 
-# Chat interface
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+# Fetch and preprocess website content
+url = "https://micor.agriculture.gov.au/"
+raw_content = fetch_website_content(url)
 
-if prompt := st.chat_input("Ask a question about MICOR"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+if raw_content:
+    paragraphs = [p for p in raw_content.split('\n') if p.strip()]
+    processed_paragraphs = [preprocess_text(p) for p in paragraphs]
 
-    # Get relevant content and generate response
-    relevant_content = get_most_relevant_content(preprocess_text(prompt), processed_paragraphs)
-    response = generate_response(prompt, relevant_content)
+    # Chat interface
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
 
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    if prompt := st.chat_input("Ask a question about MICOR"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Get relevant content and generate response
+        relevant_content = get_most_relevant_content(preprocess_text(prompt), processed_paragraphs)
+        response = generate_response(prompt, relevant_content)
+
+        # Display assistant response in chat message container
+        with st.chat_message("assistant"):
+            st.markdown(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+else:
+    st.error("Failed to fetch website content. Please try again later.")

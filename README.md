@@ -23,7 +23,7 @@ MicorBot is a Streamlit application that allows users to chat with and query inf
 
 4. Run the Streamlit app:
    ```
-   streamlit run app.py
+   streamlit run streamlit_app.py
    ```
 
 5. Open your web browser and go to `http://localhost:8501` to use the app.
