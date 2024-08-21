@@ -3,6 +3,7 @@ import google.generativeai as genai
 from bs4 import BeautifulSoup
 import requests
 import re
+from urllib.parse import urljoin
 
 # Set up logging
 import logging
@@ -20,33 +21,60 @@ if 'messages' not in st.session_state:
     st.session_state.messages = []
 
 @st.cache_data(ttl=3600)
-def get_micor_pages():
-    pages = [
-        "Pages/default.html",
-        "Plants/default.html",
-        "Plants/Fruit/default.html",
-        "Plants/Fruit/Fresh/default.html",
-        "Plants/Grain/default.html",
-        "Plants/Horticulture/default.html",
-        "Plants/Seeds/default.html",
-    ]
-    return pages
+def discover_micor_pages(base_url):
+    pages = set()
+    to_visit = [base_url]
+    visited = set()
 
-def fetch_page_content(page_url):
-    full_url = BASE_URL + page_url
-    response = requests.get(full_url)
-    if response.status_code == 200:
-        return response.text
-    else:
-        logging.error(f"Failed to fetch {full_url}: {response.status_code}")
+    while to_visit:
+        url = to_visit.pop(0)
+        if url in visited:
+            continue
+
+        visited.add(url)
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, 'html.parser')
+                pages.add(url)
+
+                # Find all links
+                for link in soup.find_all('a', href=True):
+                    href = link['href']
+                    full_url = urljoin(url, href)
+                    if full_url.startswith(base_url) and full_url not in visited:
+                        to_visit.append(full_url)
+
+                # Look for potential HTML files in the same directory
+                current_dir = '/'.join(url.split('/')[:-1]) + '/'
+                for potential_file in ['index.html', 'default.html']:
+                    potential_url = urljoin(current_dir, potential_file)
+                    if potential_url not in visited and potential_url not in to_visit:
+                        to_visit.append(potential_url)
+
+        except Exception as e:
+            logging.error(f"Error fetching {url}: {e}")
+
+    return list(pages)
+
+def fetch_page_content(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+        else:
+            logging.error(f"Failed to fetch {url}: {response.status_code}")
+            return None
+    except Exception as e:
+        logging.error(f"Error fetching {url}: {e}")
         return None
 
 def search_micor_website(query):
     relevant_content = []
-    pages = get_micor_pages()
+    pages = discover_micor_pages(BASE_URL)
     
-    for page in pages:
-        content = fetch_page_content(page)
+    for page_url in pages:
+        content = fetch_page_content(page_url)
         if content:
             soup = BeautifulSoup(content, 'html.parser')
             text_content = soup.get_text()
@@ -54,9 +82,9 @@ def search_micor_website(query):
             # Simple relevance check (can be improved)
             if re.search(r'\b' + re.escape(query) + r'\b', text_content, re.IGNORECASE):
                 relevant_content.append({
-                    'title': soup.title.string if soup.title else page,
+                    'title': soup.title.string if soup.title else page_url,
                     'content': text_content[:500],  # First 500 characters as a preview
-                    'url': BASE_URL + page
+                    'url': page_url
                 })
     
     return relevant_content[:3]  # Return top 3 most relevant results
