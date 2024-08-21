@@ -1,10 +1,8 @@
 import streamlit as st
 from duckduckgo_search import DDGS
 import nltk
-from nltk.tokenize import sent_tokenize
+from nltk.tokenize import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
-from collections import Counter
 import string
 import logging
 
@@ -14,10 +12,20 @@ logging.basicConfig(level=logging.INFO)
 # Download necessary NLTK data
 @st.cache_resource
 def download_nltk_data():
-    nltk.download('punkt')
-    nltk.download('stopwords')
+    try:
+        nltk.data.find('tokenizers/punkt')
+        nltk.data.find('corpora/stopwords')
+    except LookupError:
+        nltk.download('punkt')
+        nltk.download('stopwords')
 
-download_nltk_data()
+# Try to download NLTK data, but continue even if it fails
+try:
+    download_nltk_data()
+    USE_NLTK = True
+except Exception as e:
+    logging.error(f"Failed to download NLTK data: {e}")
+    USE_NLTK = False
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -34,16 +42,25 @@ def search_micor(query):
         return []
 
 def preprocess_text(text):
-    # Tokenize the text into words
-    tokens = word_tokenize(text.lower())
-    # Remove punctuation and stopwords
-    stop_words = set(stopwords.words('english'))
-    tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
+    if USE_NLTK:
+        # Tokenize the text into words
+        tokens = word_tokenize(text.lower())
+        # Remove punctuation and stopwords
+        stop_words = set(stopwords.words('english'))
+        tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
+    else:
+        # Fallback to basic preprocessing if NLTK is not available
+        tokens = text.lower().split()
+        tokens = [word.strip(string.punctuation) for word in tokens if word.strip(string.punctuation)]
     return tokens
 
 def extract_relevant_sentences(query, text):
     query_tokens = set(preprocess_text(query))
-    sentences = sent_tokenize(text)
+    if USE_NLTK:
+        sentences = sent_tokenize(text)
+    else:
+        # Fallback to basic sentence splitting if NLTK is not available
+        sentences = text.split('.')
     relevant_sentences = []
     
     for sentence in sentences:
@@ -77,6 +94,9 @@ def generate_response(query):
 
 # Streamlit UI
 st.title("MicorBot - Australian Export Requirements Assistant")
+
+if not USE_NLTK:
+    st.warning("Running in limited mode. Some features may not be available.")
 
 st.info("This app provides information about MICOR (Manual of Importing Country Requirements) and Australian export requirements. Always verify information with official sources.")
 
