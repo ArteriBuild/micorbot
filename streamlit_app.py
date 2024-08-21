@@ -1,31 +1,11 @@
 import streamlit as st
 from duckduckgo_search import DDGS
-import nltk
-from nltk.tokenize import sent_tokenize, word_tokenize
-from nltk.corpus import stopwords
 import string
+import re
 import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
-
-# Download necessary NLTK data
-@st.cache_resource
-def download_nltk_data():
-    try:
-        nltk.data.find('tokenizers/punkt')
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('punkt')
-        nltk.download('stopwords')
-
-# Try to download NLTK data, but continue even if it fails
-try:
-    download_nltk_data()
-    USE_NLTK = True
-except Exception as e:
-    logging.error(f"Failed to download NLTK data: {e}")
-    USE_NLTK = False
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -42,25 +22,22 @@ def search_micor(query):
         return []
 
 def preprocess_text(text):
-    if USE_NLTK:
-        # Tokenize the text into words
-        tokens = word_tokenize(text.lower())
-        # Remove punctuation and stopwords
-        stop_words = set(stopwords.words('english'))
-        tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
-    else:
-        # Fallback to basic preprocessing if NLTK is not available
-        tokens = text.lower().split()
-        tokens = [word.strip(string.punctuation) for word in tokens if word.strip(string.punctuation)]
-    return tokens
+    # Convert to lowercase and remove punctuation
+    text = text.lower()
+    text = text.translate(str.maketrans("", "", string.punctuation))
+    # Split into words
+    words = text.split()
+    # Remove common English stop words
+    stop_words = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"])
+    return [word for word in words if word not in stop_words]
+
+def simple_sentence_tokenize(text):
+    # Split text into sentences based on common sentence-ending punctuation
+    return re.split(r'(?<=[.!?])\s+', text)
 
 def extract_relevant_sentences(query, text):
     query_tokens = set(preprocess_text(query))
-    if USE_NLTK:
-        sentences = sent_tokenize(text)
-    else:
-        # Fallback to basic sentence splitting if NLTK is not available
-        sentences = text.split('.')
+    sentences = simple_sentence_tokenize(text)
     relevant_sentences = []
     
     for sentence in sentences:
@@ -94,9 +71,6 @@ def generate_response(query):
 
 # Streamlit UI
 st.title("MicorBot - Australian Export Requirements Assistant")
-
-if not USE_NLTK:
-    st.warning("Running in limited mode. Some features may not be available.")
 
 st.info("This app provides information about MICOR (Manual of Importing Country Requirements) and Australian export requirements. Always verify information with official sources.")
 
