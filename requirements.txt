@@ -5,4 +5,5 @@ numpy
 requests
 beautifulsoup4
 duckduckgo_search
-openai
+transformers
+torch
