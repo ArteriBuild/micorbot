@@ -1,79 +1,199 @@
 import streamlit as st
-import google.generativeai as genai
-from duckduckgo_search import DDGS
-import logging
+import pdfplumber
+import os
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+from PIL import Image
+import numpy as np
 
-# Set up logging
-logging.basicConfig(level=logging.INFO)
+# Streamlit configuration
+st.set_page_config(page_title="DAFF Policy Impact Analyzer", layout="wide")
 
-# Initialize Gemini API
-genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-pro')
+# DAFF context information
+DAFF_CONTEXT = """
+The Department of Agriculture, Fisheries and Forestry (DAFF) is responsible for:
 
-# Initialize session state
-if 'messages' not in st.session_state:
-    st.session_state.messages = []
+1. Agricultural policy: Developing and implementing policies to support the productivity, profitability, and sustainability of Australia's agricultural, fisheries, and forestry industries.
 
-@st.cache_data(ttl=3600)  # Cache for 1 hour
-def search_australian_exports(query):
-    try:
-        with DDGS() as ddgs:
-            results = list(ddgs.text(f"{query} Australia export", max_results=3))
-        return results
-    except Exception as e:
-        logging.error(f"Error performing search: {e}")
-        return []
+2. Biosecurity: Protecting Australia's animal and plant health status to maintain overseas markets and protect the economy and environment from pests and diseases.
 
-def generate_response(query):
-    search_results = search_australian_exports(query)
+3. Exports: Supporting agricultural and food exports, including through trade negotiations and market access.
+
+4. Research and innovation: Promoting and funding research, development, and extension in agriculture, fisheries, and forestry.
+
+5. Natural resource management: Developing policies for sustainable management of Australia's natural resources in relation to agriculture.
+
+6. Drought and rural support: Providing assistance to farmers and rural communities affected by drought and other challenges.
+
+7. Fisheries management: Ensuring the sustainable use of Australia's fisheries resources.
+
+8. Forestry: Supporting the sustainable management and use of Australia's forest resources.
+
+Key priorities include:
+- Driving innovation and productivity in the agriculture sector
+- Strengthening Australia's biosecurity system
+- Supporting farmers and rural communities
+- Expanding agricultural trade and market access
+- Promoting sustainable agriculture and natural resource management
+- Developing digital agriculture capabilities
+- Managing fisheries for long-term sustainability
+"""
+
+# Sample policy text
+SAMPLE_POLICY = """
+Proposed Policy: Sustainable Agricultural Development and Digital Innovation Initiative
+
+Our policy aims to modernize and sustain Australia's agricultural sector through the following key initiatives:
+
+1. Digital Transformation in Agriculture:
+   - Implement a nationwide program to provide high-speed internet access to all rural and remote farming communities.
+   - Develop and promote the use of AI-driven farm management systems to optimize crop yields and resource usage.
+   - Establish a national agricultural data platform to facilitate information sharing and decision-making among farmers, researchers, and policymakers.
+
+2. Biosecurity Measures:
+   - Enhance border control measures to prevent the introduction of invasive species and diseases.
+   - Allocate funds for research into new detection technologies for potential biosecurity threats.
+   - Conduct regular biosecurity awareness campaigns for farmers and the general public.
+
+3. Sustainable Farming Practices:
+   - Introduce incentives for farmers adopting regenerative agriculture techniques.
+   - Promote crop diversification and rotation to improve soil health and reduce pest pressures.
+   - Encourage the use of precision agriculture technologies to minimize water usage and chemical inputs.
+
+4. Climate Resilience in Agriculture:
+   - Develop climate-resistant crop varieties through increased funding for agricultural research.
+   - Implement a carbon credit system for farmers who adopt practices that sequester carbon in soil.
+   - Establish regional climate adaptation plans for different agricultural zones across Australia.
+
+5. Pacific Region Collaboration:
+   - Share agricultural best practices and technologies with Pacific Island nations to enhance their food security.
+   - Collaborate on regional biosecurity initiatives to protect shared ecosystems.
+   - Provide training and resources to Pacific farmers on sustainable and climate-smart agriculture techniques.
+
+6. Biodiversity and Wildlife Conservation:
+   - Create wildlife corridors in agricultural landscapes to support native species movement.
+   - Implement a grant program for farmers who protect and restore native habitats on their properties.
+   - Develop guidelines for wildlife-friendly farming practices, particularly in areas adjacent to protected habitats.
+
+This policy seeks to balance technological advancement, environmental sustainability, and regional cooperation to ensure a resilient and productive agricultural sector for Australia's future.
+"""
+
+def extract_text_from_pdf(pdf_path):
+    with pdfplumber.open(pdf_path) as pdf:
+        return " ".join(page.extract_text() for page in pdf.pages)
+
+def compare_policy_to_document(policy_text, document_text):
+    vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1,2), max_features=1000)
+    tfidf_matrix = vectorizer.fit_transform([policy_text, document_text])
+    similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
     
-    context = "Recent search results (use if relevant):\n" + "\n".join([f"- {result['title']}" for result in search_results])
+    feature_names = vectorizer.get_feature_names_out()
+    policy_tfidf = tfidf_matrix[0].toarray()[0]
+    doc_tfidf = tfidf_matrix[1].toarray()[0]
     
-    prompt = f"""You are an AI assistant specializing in Australian exports, trade regulations, and related topics. 
-    Answer the user's question about Australian exports or regulations. Use your knowledge to provide accurate and up-to-date information.
-    If you don't have specific information, provide general guidance and suggest reliable sources for more details.
-    Always focus on Australian context in your answers.
+    top_policy_terms = [feature_names[i] for i in policy_tfidf.argsort()[-20:][::-1]]
+    top_doc_terms = [feature_names[i] for i in doc_tfidf.argsort()[-20:][::-1]]
+    
+    common_terms = set(top_policy_terms) & set(top_doc_terms)
+    
+    return similarity, list(common_terms), top_policy_terms, top_doc_terms
 
-    Recent context (use only if directly relevant):
-    {context}
+def generate_impact_description(similarity, common_terms):
+    if similarity > 0.3:
+        impact_level = "High Alignment"
+        description = "The proposed policy shows strong alignment with DAFF priorities and strategies."
+    elif similarity > 0.2:
+        impact_level = "Moderate Alignment"
+        description = "The proposed policy shows notable alignment with some DAFF priorities and strategies."
+    elif similarity > 0.1:
+        impact_level = "Low Alignment"
+        description = "The proposed policy shows some alignment with DAFF priorities and strategies, but there are significant differences."
+    else:
+        impact_level = "Minimal Alignment"
+        description = "The proposed policy shows little alignment with current DAFF priorities and strategies."
 
-    User question: {query}
+    if common_terms:
+        description += f" Key areas of potential alignment include: {', '.join(common_terms)}."
+    else:
+        description += " No specific areas of alignment were identified."
 
-    Please provide a direct, informative answer to the user's question, focusing on Australian context and information."""
+    description += " Consider how this alignment (or lack thereof) impacts the policy's effectiveness and comprehensiveness in the context of DAFF's responsibilities."
+    
+    return impact_level, description
 
-    try:
-        response = model.generate_content(prompt)
-        answer = response.text
-        return answer + "\n\nPlease note: While I strive to provide accurate information, always verify critical details with official Australian government sources for the most up-to-date and comprehensive information on exports and regulations."
-    except Exception as e:
-        logging.error(f"Error generating response: {e}")
-        return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
+def generate_impact_report(policy_text, document_similarities):
+    report = "DAFF Policy Impact Analysis Report\n\n"
+    report += f"Policy Text: {policy_text[:200]}...\n\n"
+    report += "Impact on DAFF Priorities and Strategies:\n"
+    for doc, (similarity, common_terms, top_policy_terms, top_doc_terms) in document_similarities.items():
+        impact_level, impact_description = generate_impact_description(similarity, common_terms)
+        report += f"- {doc}:\n"
+        report += f"  Impact Level: {impact_level}\n"
+        report += f"  Similarity Score: {similarity:.2f}\n"
+        report += f"  Description: {impact_description}\n"
+        report += f"  Key Aligned Terms: {', '.join(common_terms)}\n"
+        report += f"  Top Policy Terms: {', '.join(top_policy_terms[:10])}\n"
+        report += f"  Top DAFF Priority Terms: {', '.join(top_doc_terms[:10])}\n\n"
+    return report
 
-# Streamlit UI
-st.title("AusExportBot - Australian Export Information Assistant")
+def main():
+    logo = Image.open("logo.png")
+    st.image(logo, width=200)
+    
+    st.title("Department of Agriculture, Fisheries and Forestry (DAFF) Policy Impact Analyzer")
 
-st.info("This app provides general information about Australian exports, trade regulations, and related topics. Always verify information with official Australian government sources.")
+    st.write("""
+    Welcome to the DAFF Policy Impact Analyzer!
 
-# Chat interface
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
+    This app analyzes the potential impact of a proposed policy on key priorities and strategies 
+    of the Department of Agriculture, Fisheries and Forestry.
 
-if prompt := st.chat_input("Ask about Australian exports, trade regulations, or related topics"):
-    st.session_state.messages.append({"role": "user", "content": prompt})
-    with st.chat_message("user"):
-        st.markdown(prompt)
+    Here's how it works:
+    1. Review the DAFF context information.
+    2. Enter your proposed policy text or use the sample policy.
+    3. The app compares your policy to DAFF's priorities and strategies using natural language processing.
+    4. An impact report is generated, showing how your policy might align with DAFF's focus areas.
 
-    # Generate response
-    with st.spinner("Generating response..."):
-        response = generate_response(prompt)
+    Let's get started!
+    """)
 
-    # Display assistant response in chat message container
-    with st.chat_message("assistant"):
-        st.markdown(response)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+    st.subheader("DAFF Context Information")
+    st.write(DAFF_CONTEXT)
 
-# Add a button to clear the chat history
-if st.button("Clear Chat History"):
-    st.session_state.messages = []
-    st.experimental_rerun()
+    st.subheader("Policy Analysis")
+    st.write("You can use our sample policy or enter your own:")
+    
+    if st.button("Use Sample Policy"):
+        st.session_state.policy_text = SAMPLE_POLICY
+    
+    policy_text = st.text_area("Enter your proposed policy text here:", value=st.session_state.get('policy_text', ''), height=300)
+
+    if st.button("Analyze Policy"):
+        if policy_text:
+            with st.spinner("Analyzing policy impact..."):
+                similarity, common_terms, top_policy_terms, top_doc_terms = compare_policy_to_document(policy_text, DAFF_CONTEXT)
+                document_similarities = {"DAFF Priorities and Strategies": (similarity, common_terms, top_policy_terms, top_doc_terms)}
+                
+                report = generate_impact_report(policy_text, document_similarities)
+                st.text_area("Impact Report", report, height=400)
+                
+                # Visualization of impact
+                st.subheader("Impact Visualization")
+                st.write("DAFF Priorities and Strategies:")
+                st.progress(similarity)
+                impact_level, _ = generate_impact_description(similarity, common_terms)
+                st.write(f"Impact Level: {impact_level}")
+                st.write(f"Key Aligned Terms: {', '.join(common_terms)}")
+                st.write(f"Top Policy Terms: {', '.join(top_policy_terms[:10])}")
+                st.write(f"Top DAFF Priority Terms: {', '.join(top_doc_terms[:10])}")
+        else:
+            st.warning("Please enter policy text to analyze.")
+
+    st.write("""
+    Note: This analysis uses natural language processing to compare your policy text with 
+    DAFF's priorities and strategies. The results should be interpreted as potential impacts 
+    and used as a starting point for further, more detailed analysis by domain experts.
+    """)
+
+if __name__ == "__main__":
+    main()
