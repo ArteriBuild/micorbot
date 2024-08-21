@@ -1,0 +1,1360 @@
+/* Copyright © 2016 - 2023 Australian Government *****************************
+'*  Name:        sc_wide.css
+'*  Description: Global style library.
+'*  Email:       wilson.wampers@gmail.com
+'*****************************************************************************
+'*  Modification History:  
+'*  -When           -Who            -Bug#           -What
+'*  --------------------------------------------------------------------------
+'*  -11-Nov-2022    -Wilson Wampers -               -Version Upgrade
+'*****************************************************************************
+LM: ww.231023.1522_P16 */ 
+
+body, #pageStatusBar, #migrationToolPromotionBar, .ms-status-msg, .js-callout-body, .ms-listLink {
+    font-size: .825rem !important;
+    font-family: 'Segoe UI', 'Segoe',Tahoma,Helvetica,Arial,sans-serif !important;
+    line-height: normal;
+    white-space: normal;
+    word-break: normal;
+    letter-spacing: normal;
+}
+
+.js-webpart-titleCell, .ms-webpart-controlBox, .js-webpart-menuCell, .ms-webpart-checkboxTd {
+    display: inline-block;
+    margin-top: -20px;
+}
+
+.ms-webpart-controlBox {
+    margin-top: 0px !important;
+}
+
+div.waitMsg {
+    font-size: .85rem;
+    color: rgb(19, 37, 65);
+}
+
+/*S: accessebility requirement */
+div#s4-workspace a {
+    color: #005f85;
+    text-decoration: none; 
+}
+
+div#s4-workspace a:hover {
+    text-decoration: underline;
+}
+
+h3.trigger a {
+    color: #000 !important;
+}
+
+h3.trigger a:hover {
+    text-decoration: none !important;
+}
+
+ul#tools li a {
+    color: #fff !important;
+}
+
+ul#tools li#liHelp a {
+    color: #000 !important;
+}
+
+ul#tools li a:hover {
+    text-decoration: none !important;
+}
+
+ul.menu li.menu-item a {
+    color: #fff !important;
+} 
+
+p.footer-text a {
+    color: #fff !important;
+}
+
+div.ms-srch-ellipsis a {
+    text-decoration: underline !important;
+}
+
+div.ms-srch-ellipsis a:hover {
+    text-decoration: none !important;
+}
+/*E: accessebility requirement */
+
+div.page-micor-home {
+    margin-top: -12px;
+}
+
+div.fb_Scroll_Pos_Wrap {
+    margin-top: -8px;
+}
+
+#s4-bodyContainer {
+    padding: 0 !important;
+}
+
+header {
+    max-height: 123px !important;
+}
+/*S: micor scrollbar */
+::-webkit-scrollbar {
+    width: 13px;
+    height:13px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: rgba(169, 169, 169, 0.50);
+    border-radius: 2px; 
+    max-width: 11px !important;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(111, 111, 111, 1);
+}
+
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.1);
+    background-color: #fff; 
+    width: 13px !important;
+}
+
+::-webkit-scrollbar-button {
+    background-color: #f0f0f0;
+    border-radius: 0px;
+}
+
+::-webkit-scrollbar-button:vertical:decrement {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_up.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:vertical:decrement:hover {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_up_h.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_left.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:horizontal:decrement:hover {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_left_h.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:vertical:increment {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_down.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:vertical:increment:hover {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_down_h.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:horizontal:increment {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_right.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+
+::-webkit-scrollbar-button:horizontal:increment:hover {
+    background-image: url('/_catalogs/masterpage/micor2020/images/sc_right_h.png');
+    background-size: 13px;
+    width:  13px;
+    height: 13px;
+}
+/*E: micor scrollbar */
+
+::selection {
+    background: rgba(125, 216, 255, 1) !important;
+}
+
+.ms-cui-ribbon, .ms-cui-menu, .ms-cui-toolbar-toolbar {
+    font-family: 'Segoe UI',Tahoma,Verdana,sans-serif !important;
+    font-size: 8pt;
+    color: #6c6e70;
+    background-color: white !important;
+}
+
+span.DEV {
+    color: rgb(0, 255, 80);
+    position: fixed;
+    top: 8px;
+    left: 132px; 
+    z-index: 10;
+    font-size: 1.5rem;
+}
+
+span.TEST {
+    color: rgb(251, 255, 0);
+    position: fixed;
+    top: 8px;
+    left: 132px; 
+    z-index: 10;
+    font-size: 1.5rem;
+}
+
+.ms-listLink {
+    font-size: 13px;
+    font-family: "Segoe UI","Segoe",Tahoma,Helvetica,Arial,sans-serif;
+    line-height: normal;
+    white-space: normal;
+    word-break: normal;
+}
+
+.micor-header {
+    max-width: 1570px;
+    margin: auto;
+}
+/* Home */
+
+.micor-home {
+    background: #003151;
+    color: white;
+    font-size: 1.5rem;
+    opacity: 0.80;
+    padding: 0;
+    margin: 0;
+}
+
+.micor-intro {
+    background: white;
+    padding: 1.25em 0;
+    max-width: 1570px;
+    margin: auto;
+}
+
+.micor-intro p,
+.micor-intro > div {
+    margin-left: 2rem;
+    margin-right: 2rem;
+    font-size: 16px;
+    padding: 3px 0px 3px 0px;
+}
+
+div.micor-intro > div {
+    margin-left: 2rem !important; 
+    margin-right: 2rem !important;
+    margin-top: 0px;
+    margin-bottom: 10px;
+}
+
+div.micor-intro h2 {
+    color: #005f85;
+    margin: -4px 20px 6px 20px;
+    font-size: 2.1rem;
+    font-weight: normal;
+}
+
+div.micor-intro > div p {
+    margin: 0 20px 0 -2px;
+}
+
+div.micor-name {
+    min-height: 150px;
+    max-height: 150px;
+    display: flex;
+}
+
+div#commodity-name h1,
+div.micor-name h1 {
+    border-left: 10px solid #a9b400;
+    font-family: 'Segoe UI',Tahoma,Verdana,sans-serif !important;
+    font-weight: 450;
+    color: white !important;
+    font-size: 33px;
+    line-height: 1.6;
+    padding: 0 17.5px 0 17.5px;
+    margin: auto auto auto 0 !important;
+}
+
+div#commodity-name {
+    min-height: 150px;
+    max-height: 150px;
+    display: flex;
+} 
+
+#commodity-name {
+    float: left;
+    min-width: 50%;
+    margin: 0;
+}
+
+#commodity-name {
+    background: #003151;
+    color: white;
+    font-size: 2.5em;
+    opacity: 0.80;
+    /* margin: 0 20px; */
+    /* padding: 0.25em 0; */
+}
+/* 
+#commodity-name p {
+    border-left: 10px solid #a9b400;
+    margin: 0;
+    padding-left: 0.5em;
+} */
+
+.micor-search-form {
+    float: right;
+    /* padding: 51px 0 40px 0; */
+    width: 25%;
+    margin: auto 0;
+    background: none;
+}
+
+.commodity-search-form {
+    float: right;
+    /* padding: 51px 0 40px 0; */
+    width: 25%;
+    margin: auto 0;
+    background: none;
+}
+
+.commodity-menu li a {
+    padding: 1em;
+}
+
+/* override in pagelayouts15.css*/
+div.article, div.welcome {
+    padding: 0;
+}
+
+.ms-core-brandingText .resizeBlocks {
+    position: fixed !important;
+    margin-right:10px;
+    font-weight:400;
+    font-size:.75rem;
+    background-color: #f6f6f6;
+    color: black;
+    left: 172px;
+    height: 1px;
+    padding: 14px 10px 10px 10px;
+    margin-top: 3px;
+    z-index: 99;
+    top: 5px;
+    display: block !important;
+}
+
+/*S: Micor search box */
+/* .micor-search-form {
+    display: flex;
+    flex-flow: row;
+    align-self: center;
+    padding: 60px 0 40px 0;
+} */
+.micor-search-form {
+    display: flex;
+    flex-flow: row;
+    align-self: center;
+    padding: 60px 0 40px 0;
+}
+
+.micor-search-form input[type="text"] {
+    width: 82%;
+    padding: .6em .8em;
+    background: #ffffff;
+    border-radius: 0;
+    border: 1px solid #c9c9c9;
+    border-right: 0;
+    display: block;
+    height: 1.4rem;
+}
+
+.micor-search-form input[type="text"]:focus {
+    outline: none;
+    border-color: #343434;
+}
+
+.micor-search-form input::-webkit-input-placeholder,
+.micor-search-form input:-moz-placeholder,
+.micor-search-form input::-moz-placeholder,
+.micor-search-form input:-ms-input-placeholder {
+    color: #848484;
+}
+
+.micor-search-form label {
+    background: #ffffff;
+}
+
+.micor-search-form button {
+    border: 1px solid #003151;
+    background: #003151;
+    color: #ffffff;
+    width: 55px;
+    display: inline-block;
+    overflow: hidden;
+    outline-offset: -1px;
+    margin: 0;
+    padding: 0;
+}
+
+.micor-search-form button:before {
+    font-family: 'Font Awesome 5 Pro';
+    content: '\f002';
+    font-size: 1.5em;
+    display: inline-block;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin-right: 4px;
+}
+
+img.loadingImg {
+    width: 20px;
+    height: 20px;
+    border: 1px solid transparent;
+}
+/*E: Micor wide search box */
+
+/*S: Commodity search box */
+.commodity-search-form {
+    display: flex;
+    padding: 56px 0 0 0;
+}
+/* .commodity-search-form {
+    display: flex;
+    flex-flow: row;
+    align-self: center;
+    padding: 56px 0 52px 0;
+} */
+
+.commodity-search-form input[type="text"] {
+    width: 82%;
+    padding: .6em .8em;
+    background: #ffffff;
+    border-radius: 0;
+    border: 1px solid #c9c9c9;
+    border-right: 0;
+    display: block;
+    height: 1.4rem;
+}
+
+.commodity-search-form input[type="text"]:focus {
+    outline: none;
+    border-color: #343434;
+}
+
+.commodity-search-form input::-webkit-input-placeholder,
+.commodity-search-form input:-moz-placeholder, 
+.commodity-search-form input::-moz-placeholder,
+.commodity-search-form input:-ms-input-placeholder {
+    color: #848484;
+}
+
+.commodity-search-form label {
+    background: #ffffff;
+}
+
+.commodity-search-form button {
+    border: 1px solid #003151;
+    background: #003151;
+    color: #ffffff;
+    width: 55px;
+    display: inline-block;
+    overflow: hidden;
+    outline-offset: -1px;
+    margin: 0;
+    padding: 0;
+}
+
+.commodity-search-form button:before {
+    font-family: 'Font Awesome 5 Pro';
+    content: '\f002';
+    font-size: 1.5em;
+    display: inline-block;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    margin-right: 4px;
+}
+/*E: Commodity search box */
+
+/*S: MessageBox */
+h1#dialogTitleSpan {
+    font-weight: bolder;
+    font-size: 1.5rem;
+}
+
+#messages {
+    position: absolute;
+    z-index: 0;
+}
+
+.hiddenSpan{
+    position: absolute;
+    color: #fff;
+    bottom: 10px;
+    left: 10px;
+    font-family: 'Consolas';
+    font-size: 0.8em;
+}
+
+#dialog_content {
+    min-width: 320px;
+    min-height: 360px;
+    border: 0;
+    position: absolute;
+    z-index: 999;
+}
+
+#dialog_message {
+    width: 320px;
+}
+
+#dialog_message TD.msgCellIcon {
+    text-align: center;
+}
+
+#dialog_message TD.msgCellMsg {
+    border: 1px solid rgba(46, 126, 180, 0.5);
+    padding: 10px;
+    background-color: rgba(110, 167, 202, 0.1);
+}
+
+#dialog_table{
+    border: 1px solid #999;
+    border-collapse: collapse;
+    width: 320px;
+    table-layout: fixed;
+}
+
+#dialog_tbody {
+    width: 320px;
+    padding: 10px;
+}
+
+#dialog_message .btnSpacer {
+    height: 4px !important;
+}
+
+#dialog_table TD {
+    padding: 10px;
+    border: 1px solid #999;
+}
+
+#dialog_table TD.d80Cell {
+    width: 80px;
+}
+
+.d80Cell {
+    width: 80px;
+}
+
+.d240Cell {
+    width: 240px;
+}
+
+.dialogBtn {
+    cursor: default;
+    float: right;
+}
+/*E: MessageBox */
+
+/*S: Input formSlider */
+.switchRow .switch {
+    float: left;
+    position: relative;
+    display: block;
+    width: 37px;
+    height: 24px;
+    right: 4px;
+}
+  
+.switchRow .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.formSlider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #d0d0d0;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+  
+.formSlider:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+  
+input:checked + .formSlider {
+    background-color: #007DAE;
+}
+  
+input:checked + .formSlider:before {
+    -webkit-transform: translateX(12px);
+    -ms-transform: translateX(12px);
+    transform: translateX(12px);
+}
+  
+/* for the rounded formSlider */
+.formSlider.round {
+    border-radius: 65px;
+}
+
+.formSlider.round:before {
+    border-radius: 60%;
+}
+
+/*E: Input formSlider */
+
+/*S: SliderFix */
+.tblSwitch .switch {
+    display: block;
+    width: 37px !important;
+    height: 24px !important;
+    float: right;
+    position: relative;
+}
+/*E: SliderFix */
+
+/*S: Micor CCL */
+span.mCountry {
+    display: none;
+}
+
+span.vCountry {
+    display: block;
+    float: left;
+    margin-left: 5px;
+}
+
+div.mcclWrap {
+    margin-bottom: 5px;
+}
+
+div#mCCL {
+    max-width: 32rem;
+    position: absolute;
+    z-index: 25;
+}
+
+div#mCCL span.select-wrap {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+div#mCCL span.select {
+    border: 1px solid rgb(142, 142, 142);
+    min-width: 30.66rem;
+    line-height: 22px;
+    font-size: .95rem;
+}
+
+div#mCCL span.select.active {
+    border: 1px solid rgba(0, 123, 255, 0.747);
+    min-width: 420px;
+    width: 30.66rem;
+    line-height: 22px;
+    font-size: .95rem;
+}
+
+div#mCCL input.select-options {
+    justify-self: start;
+    padding-left: 5px;
+    min-width: 30.2rem;
+    border: 0;
+    border-collapse: collapse;
+    position: relative;
+    top: -1px;
+}
+
+div#mCCL span.select-arrow {
+    font-family: Webdings;
+    padding: 0 0 0 5px;
+    float: right;
+    position: absolute;
+    z-index: 2;
+    margin: 1px 0 0 -20px;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div#mCCL span.front-arrow {
+    font-family: Webdings;
+    padding: 0 5px 0 5px;
+    float: left;
+    position: relative;
+    top: 1px;
+}
+
+div#mCCL span.no-arrow {
+    font-family: Webdings;
+    padding: 0 5px 0 5px;
+    float: left;
+    position: relative;
+    top: 1px;
+    color: transparent;
+}
+
+div#mCCL div.gap-ul {
+    height:2px !important;
+    border: 1px solid transparent;
+}
+
+div#mCCL div.options {
+    display: none;
+    margin: auto 0;
+    padding: 1px 0 1px 0;
+    overflow-y: auto;
+    max-height: 440px;
+    width: 30.66rem;
+    position: absolute;
+    z-index: 1;
+    background-color: #fff;
+    border: 1px solid #999;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+div#mCCL ol.options {
+    list-style: none !important;
+    padding: 0 0 1px 0;
+    margin: 0;
+}
+
+div#mCCL ol li {
+    padding-left: 5px;
+    line-height: 22px;
+    font-size: .95rem;
+    vertical-align: middle;
+    cursor: default;
+}
+
+div#mCCL ol li.on:hover,
+div#mCCL ol li.on.selected {
+    background-color: #777;
+    color: white;
+}
+
+div#mCCL ol li.off {
+    background-color: rgba(121, 120, 120, 0.142);
+    color: rgba(0, 0, 0, 0.75);
+    font-style: italic;
+}
+
+div#mCCL ol li.off:hover {
+    background-color: rgba(121, 120, 120, 0.142);
+    color: rgba(0, 0, 0, 0.75);
+}
+
+.ms-formfieldvaluecontainer {
+    border: 1px solid transparent;
+    margin: 0px 0px 4px;
+    padding: 5px;
+}
+/*E: Micor CCL */
+
+.ms-alternating {
+    background-color: rgba(180, 180, 180, 0.1);
+}
+
+/*S: Plants Landing & latest updates */
+span.wonit {
+    color: #aaa;
+    font-size: .9rem;
+    font-weight: normal;
+    font-style: oblique;
+    position: relative;
+    top: -6px; 
+    left: 10px;
+}
+
+span.srchLoading {
+    position: relative;
+    top: 6px; 
+    left: 10px;
+}
+/* E: Plants Landing & latest updates*/
+
+a[id^="Ribbon\.Documents\.Workflow\.ViewWorkflows"] {
+    display: none;
+}
+
+span#readonly {
+    color: transparent;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: -100px;
+    left: -100px;
+    z-index: -1;
+}
+
+div.button {
+    max-width: 225px;
+    border: 1px solid silver;
+    background-color: rgba(138, 204, 231, 0.1);
+    font-size: .75rem;
+    padding: 6px;
+    cursor: pointer;
+}
+
+div.button:hover {
+    background-color: rgba(138, 204, 231, 0.4);
+}
+
+/* launchTracker & showchanges.min */
+table.tblSwitch {
+    border: 0;
+    border-color: transparent !important;
+    border-collapse: collapse;
+}
+
+@media only screen and (max-width: 425px) {
+    .menu-help {
+        margin-top: 8px !important;
+    }
+}
+
+/*S: Scrollbar reset all
+    Scroll bar nav
+    ::-webkit-scrollbar {
+        width: auto;
+    }
+
+    Track 
+    ::-webkit-scrollbar-track {
+        -webkit-box-shadow: auto; 
+        -webkit-border-radius: auto;
+        border-radius: auto;
+        background:auto;    
+    }
+
+    Handle
+    ::-webkit-scrollbar-thumb {
+        -webkit-border-radius:auto;
+        border-radius:auto;
+        background:auto; 
+        -webkit-box-shadow:auto; 
+    }
+    ::-webkit-scrollbar-thumb:window-inactive {
+        background: auto; 
+    }
+E: Scrollbar reset all */
+
+/*S: Paging selector */
+div.setPaging {
+    max-width: 240px !important;
+    float: right;
+    text-align: center;
+    font-size: .8rem;
+    display: flex;
+    flex-flow: row;
+    padding: 0;
+    margin: 0;
+    align-items: center;
+    position: relative;
+    right: 0px;
+    top: -52px;
+    gap: 6px;
+}
+
+div.setPaging div.sp {
+    color: #005f85;
+    vertical-align: middle;
+    width: 26px !important;
+    height: 24px !important;
+    padding: 6px 2px 0px 2px;
+    border: 1px solid #ddd;
+}
+
+div.setPaging div.sp.sel {
+    border: 1px solid #087fa1;
+}
+
+div.setPaging div.sp:hover {
+    color: #000;
+    background-color:rgba(8, 128, 161, 0.1);
+    border: 1px solid #087fa1;
+    cursor: pointer;
+}
+
+div.setPaging span {
+    border: 1px solid transparent;
+}
+
+div.setPaging span.sel {
+    border: 1px solid #087fa1;
+}
+
+.imgLoading {
+    width: 18px !important;
+    height: 18px !important;
+}
+
+.loadingTxt {
+    vertical-align: middle;
+}
+/*E: Paging selector */
+
+/*S: paging control */
+li.PagingImageLink {
+    margin: 0 2px 0 2px;
+}
+
+.ms-promlink-button-right,
+.ms-promlink-button-left {
+    cursor: pointer;
+    padding: 0 1px 0 1px;
+}
+
+.ms-promlink-button-right {
+    left: -199px;
+    top: -228px;
+    position: absolute;
+}
+
+.ms-promlink-button-left {
+    left: -127px;
+    top: -232px;
+    position: absolute;
+}
+
+a.ms-promlink-button.ms-promlink-button-disabled {
+    opacity: .75;
+}
+
+a.ms-promlink-button.ms-promlink-button-enalbed {
+    opacity: 1;
+}
+
+ul#Paging {
+    position: relative;
+    top: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    vertical-align: middle;
+    list-style-type: disc;
+    margin-block-start: 1rem;
+    margin-block-end: 1rem;
+    margin-inline-start: 0px;
+    margin-inline-end: 0px;
+    padding-inline-start: 40px;
+    visibility: visible;
+    padding-bottom: 20px;
+}
+
+ul#Paging li,
+a.PageLink {
+    -webkit-user-select: none;        
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+.PagingImageLink a,
+.PagingImageLink a span,
+.PagingImageLink a span img {
+    -webkit-user-select: none;        
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+ul#Paging li a {
+    letter-spacing: -.75px;
+    gap: 2px;
+    vertical-align: middle;
+}
+
+ul#Paging li.PagingDots {
+    margin: 2px 0 3px 1px;
+    color: #666;
+    cursor: pointer;
+}
+
+ul#Paging div.pageDots {
+    padding: 0 3px 3px 3px;
+    margin: 3px 0 1px 0;
+    width: 17px;
+}
+
+ul#Paging div.pageDots:hover {
+    background-color: rgba(0, 125, 174, 0.1);
+}
+
+ul#Paging div.pageDots.enabled {
+    color: #666;
+}
+
+ul#Paging div.pageDots.disabled {
+    border: 1px dotted #ddd;
+    color: #999;
+}
+
+ul#Paging li.PagingSelf a {
+    font-size: 0.95rem !important;
+    padding: 1px 1px 0 0;
+    /* color: #0072c6; */
+    font-weight: bolder;
+    text-decoration: none;
+}
+
+ul#Paging li.PagingSelf a {
+    position: relative;
+    bottom: 3px;
+}
+ul#Paging li.PagingLink a {
+    position: relative;
+    bottom: 3px;  
+}
+.ms-srch-Paging li.PagingSelf,
+.ms-srch-Paging li.PagingLink {
+    font-size: 0.90rem !important;
+    padding: 3px 1px 0 3px;
+    margin-top: 0px;
+    cursor: pointer;
+    width: auto;
+}
+
+div.pagingGap {
+    width: 28px;
+}
+
+ul#Paging div.inpGo {
+    padding: 2px 0 0 0;
+    width: 24px !important;
+    height: 22px !important;
+    border: 1px solid #999;
+    vertical-align: middle;
+    color: #666;
+    font-size: 0.85rem !important;
+    align-items: center;
+}
+
+ul#Paging div.btnGo {
+    padding: 2px 0 0 0;
+    width: 24px !important;
+    height: 22px !important;
+    border: 1px solid #999;
+    vertical-align: middle;
+    color: #666;
+    font-size: 0.85rem !important;
+}
+
+ul#Paging div.btnGo:hover {
+    background-color: rgba(0, 125, 174, 0.1);
+    border-color: #2d9dbcaf;
+    color: #000;
+    cursor: pointer;
+}
+
+.ms-promlink-button-enabled {
+    border-color: #999;
+}
+
+li[class*="PagingLink"] {
+    margin-top: 1px;
+}
+
+/*E: paging control */
+
+/*S: micor filter control */
+div#micorFilterControl {
+    text-align:justify;
+    width: 100%;
+    background-color: transparent;
+    margin: -6px 0 -6px 0;
+}
+
+h2.Filter-titleText {
+    font-size: 2.0rem;
+    font-weight: 400;
+    margin: 10px 0 -30px 0;
+    padding: 0;
+}
+
+div.micor-filters {
+    height: auto;
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap; 
+    gap: 19px;
+    margin-top: -6px;
+    -ms-flex-align: start;
+}
+
+div.micor-refiner {
+    min-width: 274px;
+}
+
+div.mF {
+    max-width: 360px !important;
+    border: 1px dotted transparent;
+    display: none;
+    position: relative;
+    z-index: 5;
+}
+
+div.mF span.select-wrap {
+    border: 2px solid rgb(8, 127, 161);
+    background-color: white;
+    width: 272px !important;
+    display: flex;
+    flex-direction: row;
+    position: relative;
+    z-index: 4;
+}
+
+div.mF div.select {
+    min-width: 274px !important;
+    height: 30px !important;
+    line-height: 30px;
+    font-size: .95rem;
+    background-color: transparent;
+}
+
+div.mF span.select.active {
+    height: 30px;
+    font-size: .95rem;
+    background-color: transparent;
+}
+
+div.mF input.filter {
+    margin: 0px 0px 1px 0px;
+    line-height: 30px;
+    font-size: .95rem;
+    width: 268px !important;
+    border: 0;
+    border-collapse: collapse;
+    position: absolute;
+    color: black;
+    background-color: rgb(255, 255, 255) !important;
+    padding: 0 0 0 4px;
+    z-index: 3;
+}
+
+div.mF input.filter:focus {
+    background-color: rgb(255, 255, 255) !important;
+    border: 0;
+    border-collapse: collapse;
+}
+
+div.mF input.filter::placeholder {
+    color: black;
+}
+
+div.mF input.disabled {
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div.mF span.select-arrow {
+    font-family: Webdings;
+    padding: 0 0 0 5px;
+    -ms-flex-align: end;
+    position: absolute;
+    z-index: 4;
+    margin: 1px 2px 0 250px;
+    color: black;
+    background-color: transparent;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div.mF div.gap-ul {
+    height:4px !important;
+    border-color: transparent;
+    border: 0;
+}
+
+div.mF div.nodes {
+    display:none;
+    margin: auto 0;
+    padding: 1px 0 1px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+    max-height: 440px;
+    background-color: #fff;
+    border: 1px solid #999;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2),
+                0 6px 20px 0 rgba(0, 0, 0, 0.2);
+    position: absolute;
+    z-index: 7;
+}
+
+div.mF ol.options {
+    min-width: 274px;
+    list-style: none !important;
+    padding: 0;
+    margin: 0;
+    background-color: white;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div.mF ol li {
+    white-space: nowrap;
+}
+
+div.mF ol li.on {
+    padding : 0 6px 0 24px;
+    line-height: 22px;
+    font-size: .95rem;
+    vertical-align: middle;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div.mF ol li.fat {
+    font-size: .95rem;
+    font-weight: bold;
+    padding-left: 6px;
+}
+
+div.mF ol li.on:hover,
+div.mF ol li.on.selected {
+    background-color: #777;
+    color: white;
+}
+
+div.mF ol li.hidden {
+    display: none;
+}
+
+div.mF ol li.display {
+    display: block;
+    background-color: #777;
+    color: white;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+}
+
+div.mF ol li.off {
+    line-height: 22px;
+    font-size: .95rem;
+    vertical-align: middle;
+    user-select: none;
+    -moz-user-select: none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -o-user-select: none;
+    background-color: rgba(121, 120, 120, 0.15);
+    color: rgba(33, 33, 33, 1);
+    padding-left: 6px;
+    border: 0 0 1px 0;
+    border-color: #000;
+}
+
+div[class*="clear-filter"] {
+    font-size: 1.0rem;
+    float: right;
+    margin: -2px 2px 0 0;
+    display: none;
+}
+
+div[class*="clear-filter"] a {
+    text-decoration: underline;
+    color: #005f85;
+    cursor: pointer;
+}
+
+div[class*="clear-filter"] a:hover {
+    text-decoration: none;
+}
+
+@media only screen and (max-width: 1165px) {
+    div.micor-filters { 
+        gap: 2px;
+    }
+}
+
+/*E: micor filter control */
+/*S: Plants: screen-reader */
+
+div#qData {
+    display: none;
+}
+
+h2.screen-reader {
+    font-family: 'Segoe UI', 'Segoe',Tahoma,Helvetica,Arial,sans-serif !important;
+    font-size: 1rem !important;
+    font-weight: bold !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    color: #343434 !important;
+    
+}
+
+h2.screen-reader.pr {
+    padding: 0 4px 0 0 !important;
+    margin: 0 !important;
+}
+
+span.vCountry {
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+}
+
+div#collapsefaq.collex {
+    margin-top: -14px;
+}
+
+div#collapsefaq.npg {
+    margin-top: -40px;
+}
+
+.ms-formfieldvaluecontainer select {
+    width: 31.5rem;
+}
+/*E: Plants: screen-reader */
+
+/*> Home page images a wrapper */
+#main div.home-features-list div.home-feature-box a.imgLink {
+    color: transparent;
+}
+#main div.home-features-list div.home-feature-box a.imgLink:hover {
+    color: transparent;
+}
+/*< Home page images a wrapper */

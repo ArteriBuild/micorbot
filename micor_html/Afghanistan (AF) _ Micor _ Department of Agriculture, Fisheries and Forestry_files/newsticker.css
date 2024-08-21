@@ -1,0 +1,62 @@
+/* Copyright (c) 2021 AWE ****************************************************
+'*  Name:        newsticker.css
+'*  Description: Global style library.
+'*  Email:       wilson.wampers@gmail.com
+'*****************************************************************************
+'*  Modification History:
+'*  -When           -Who            -Bug#           -What
+'*  -------------------------------------------------------------------------
+'*      -12-Aug-2021    -Wilson Wampers -               -Initial Version
+'****************************************************************************/
+div.ui-newsticker {
+    padding: 0;
+    margin: 0;
+    border: 1px dashed transparent;
+    background: transparent;
+    cursor: default;
+    font-family: 'Open Sans', Calibri, arial, sans-serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    line-height: 18px;
+    min-height: 50px;  
+    top: -17px;
+    left: -36px;
+    position: absolute;
+    overflow: hidden;
+    will-change: transform;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+div.ui-newsticker ul li a:hover {
+    text-decoration: underline;
+}
+
+div.ui-newsticker
+ul.ui-newsticker-list {
+    position: absolute;
+    transition-property: transform;
+    transition-timing-function: linear;
+    list-style-type: none;
+}
+
+div.ui-newsticker
+ul.ui-newsticker-list
+li.ui-newsticker-item {
+    background: rgba(104, 104, 55, 0);
+    min-height: 50px; 
+    white-space: wrap;
+    flex-wrap: wrap;
+    display: none;
+    padding: 0;
+    margin: 0 auto;
+    justify-items: center;
+}
+
+div.ui-newsticker
+ul.ui-newsticker-list
+li.ui-newsticker-item a {
+    padding-left: 0px;
+}

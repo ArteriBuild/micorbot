@@ -1,0 +1,284 @@
+/* Copyright (c) 2021 AWE ****************************************************
+'*  Name:        fbnf.css
+'*  Description: Global style library.
+'*  Email:       wilson.wampers@gmail.com
+'*****************************************************************************
+'*  Modification History:
+'*  -When           -Who            -Bug#           -What
+'*  -------------------------------------------------------------------------
+'*	-28-Jul-2021    -Feng Qin       -               -Initial Version
+'****************************************************************************/
+/* LM: ww.221222.2017_P */ 
+
+.fullMask {
+    background-color: rgba(255,255,255, .4);
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    display: flex;
+    overflow: auto;
+    cursor: wait;
+    z-index: 999; 
+}
+
+.fbnContainer {
+    margin: auto;
+    justify-content: space-around;
+    position: relative;
+    min-height: 500px;
+    z-index: 6;
+    background-color: transparent;
+    border: 1px solid transparent;
+    padding-bottom: 100px;
+}
+
+/* IE only */
+@media screen and (min-width:0\0) {
+    .fbnContainer {
+        margin: 10% auto;
+    }
+}
+
+.fbnDialog {
+    position: relative;
+    width: 965px !important;
+    z-index: 7;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0;
+    border: 1px solid transparent;
+}
+
+.fbnContentTY {
+    cursor: default;
+}
+
+.cornersWithShadow {
+    border: 1px solid rgba(0,0,0, 0.45);;
+    box-shadow:10px 10px 30px rgba(0,0,0, 0.45);
+    -moz-box-shadow: 10px 10px 30px rgba(0,0,0, 0.45);
+    -webkit-box-shadow: 10px 10px 30px rgba(0,0,0, 0.45);
+    -o-box-shadow: 10px 10px 30px rgba(0,0,0, 0.45);
+}
+
+.flexBehaviorRowWrap {
+    flex-direction: row;
+    flex-wrap: wrap;
+    flex-shrink: 50;
+}
+
+iframe#feedbackWidget {
+    visibility: hidden;
+    background-color: transparent;
+    position: absolute;
+    left: -2000px;
+    z-index: 4;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    width: 100%;
+    height: 600px;
+    border: 1px solid transparent;
+}
+
+@media only screen and (min-width: 680px) and (max-width: 980px) {
+    .fbnDialog {
+        position: relative;
+        width: 680px !important;
+        z-index: 7;
+        border-radius: 10px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid transparent;
+    }
+}
+
+@media only screen and (min-width: 500px) and (max-width: 680px) {
+    .fbnDialog {
+        position: relative;
+        width: 480px !important;
+        z-index: 7;
+        border-radius: 10px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid transparent;
+    }
+
+    iframe#feedbackWidget {
+        height: 665px;
+    }
+}
+
+@media only screen and (min-width: 320px) and (max-width: 500px) {
+    .fbnDialog {
+        position: relative;
+        width: 320px !important;
+        z-index: 7;
+        border-radius: 10px;
+        margin: 0;
+        padding: 0;
+        border: 1px solid transparent;
+    }
+}
+
+/* S: Thank You  */
+.fbnThankYou {
+    margin: auto;
+    justify-content: space-around;
+    position: relative;
+    padding-bottom: 50px;
+    z-index: 3;
+    cursor: default;
+}
+
+.fbnDialogTY {
+    padding: 15px 10px 30px 10px;
+    position: relative;
+    background-color: rgb(255, 255, 255);
+    width: 780px !important;
+    height: 460px;
+    z-index: 4;
+    border-radius: 10px;
+    margin: 0;
+    padding: 0;
+}
+
+.fbnDialogTY h3.dialogTitleTY {
+    color: #000;
+    font-size: 32px;
+    font-weight: normal;
+    font-style: normal;
+    position: relative;
+    top: 36px;
+    text-align: center;
+    z-index: 11;
+}
+
+#btnCloseTY {
+    position: absolute;
+    top: 30px;
+    right: 28px;
+    width: 20px !important;
+    height: 20px !important;
+    padding-bottom: 2px;
+    transform: scale(.875);
+    z-index: 25;
+}
+
+table.fbnTY {
+    table-layout: auto;
+    position: relative;
+    width: 100%;
+    height: 60%;
+    top: 36px;
+    background-color:rgba(255, 0, 0, 0);
+}
+
+#fbnTY TD {
+    text-align: center;
+    font-size: 16px;
+    line-height: 25px;
+}
+
+td.btnspacer {
+    height: 12px !important;
+    line-height: 12px !important;
+}
+
+input[type=button]#inpCloseTY {
+    background: #FFFFFF;
+    border: 1px solid #C4C4C4;
+    box-sizing: border-box;
+    border-radius: 5px;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 25px;
+    color: #9D9D9D;
+    width: 200px;
+    height: 44px;
+}
+
+input[type=button]#inpCloseTY:hover {
+    background-color: #007CAD;
+    mix-blend-mode: normal;
+    color: white;
+}
+
+.closeBtnTY {
+    color: #666;
+    font-weight: bold;
+    font-size: 1.4rem;
+    cursor: pointer;
+}
+
+.closeBtnTY:hover {
+    color: black;
+    transform: scale(1.1);
+}
+
+.transformCaptha {
+    transform: scale(0.5); 
+}
+
+@media only screen and (min-width: 680px) and (max-width: 980px) {
+    .fbnDialogTY {
+        padding: 15px 10px 30px 10px;
+        position: relative;
+        background-color: rgb(255, 255, 255);
+        width: 680px !important;
+        height: 410px;
+        z-index: 4;
+        border-radius: 10px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .fbnContent {
+        transform: scale(0.9);
+    }
+}
+
+@media only screen and (min-width: 500px) and (max-width: 680px) {
+    .fbnDialogTY {
+        padding: 15px 10px 30px 10px;
+        position: relative;
+        background-color: rgb(255, 255, 255);
+        width: 480px !important;
+        height: 360px;
+        z-index: 4;
+        border-radius: 10px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .fbnContent {
+        transform: scale(0.75);
+    }
+}
+
+@media only screen and (min-width: 320px) and (max-width: 500px) {
+    iframe#feedbackWidget {
+        height: 665px;
+    }
+    
+    .fbnDialogTY {
+        padding: 15px 10px 30px 10px;
+        position: relative;
+        background-color: rgb(255, 255, 255);
+        width: 280px !important;
+        height: 460px;
+        z-index: 4;
+        border-radius: 10px;
+        margin: 0 auto;
+        padding: 0;
+    }
+
+    .fbnContent {
+        transform: scale(0.5);
+    }
+}
+/* E: Thank You */

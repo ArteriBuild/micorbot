@@ -1,0 +1,22 @@
+﻿/*Subsite CSS*/
+#s4-workspace #insideHeader {
+    display:block;
+}
+#s4-workspace #insideHeader {
+    background-color: #7E563C;      
+}
+#s4-workspace #main{
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;	
+}
+#DeltaPlaceHolderMain #PageTitle{display:block;}
+#s4-bodyContainer #pageControls {display:block;}
+
+/* Override Heading Navigation  - Start */
+
+#heading-nav h2 {
+    color: #ffffff;
+    background-color: #7E563C;
+}
+
+/* Override Heading Navigation  - End */

@@ -1,0 +1,761 @@
+/* Copyright © 2016 - 2023 Australian Government *****************************
+'*  Name:        showchanges.css
+'*  Description: Global style library.
+'*  Email:       wilson.wampers@gmail.com
+'*****************************************************************************
+'*  Modification History:
+'*  -When           -Who            -Bug#           -What
+'*  -------------------------------------------------------------------------
+'*  -09-Sep-2021    -Wilson Wampers -               -Initial Version
+'*****************************************************************************
+LM: ww.231008.1649_P16  */
+
+html {
+    background-color: #2f2f2f;
+}
+
+li#Ribbon\.PublishTab-title {
+    display: none;
+}
+
+#s4-workspace #main{
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+div.h2TcSpacer {
+    height:1px !important;
+    padding: 0;
+    margin: 0;
+    margin-top: 27px;
+}
+
+div.hiddenLayoutField, div.VersionNumber {
+    display: none;
+}
+
+div#outputContent {
+    display: none;
+}
+
+div.mergedContent {
+    display: block;
+}
+
+div.trackChangesContent {
+    display: block;
+}
+
+div.ms-textXLarge {
+    font-size: 1.1em;
+}
+
+span.ms-diffdelete {
+    background: rgba(255, 213, 222, .65);
+    text-decoration: line-through;
+    border:2px solid transparent;
+}
+
+span.ms-diffinsert {
+    background: rgba(101,247,65, .5);
+    text-decoration: none;
+    color: black;
+    border:2px solid transparent;
+}
+
+li#tc {
+    display:flex;
+    flex-wrap: nowrap;
+    align-content: center;
+    cursor: pointer;
+}
+
+div#divSwitch {
+    position: absolute;
+    z-index: 10; 
+    top: 30px;
+    height: 42px;
+    padding: 0;
+    margin: 0;
+    justify-content: right;
+    float: right;
+}
+
+#divSwitch table {
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#divSwitch tbody,
+#divSwitch thead {
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+#divSwitch table tr td {
+    padding: 0;
+}
+
+#divSwitch table td {
+    text-align: right;
+    border-collapse: collapse;
+    border-spacing: 0px;
+    justify-content: right;
+}
+
+table.tblSwitch tr td{
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+/*S: Track changes switch */
+
+div#tcWrap {
+    width: auto;
+}
+
+.tblSwitch .switch {
+    display: block;
+    width: 37px !important;
+    height: 24px !important;
+    float: right;
+}
+  
+.tblSwitch .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+#divSwitch span.tcSpanTitle {
+    font-size: .95rem;
+    font-weight: bold;
+    margin-right: 16px;
+}
+
+span.npSpanTitle {
+    font-size: 1.0rem;
+    font-weight: bold;
+    position: relative;
+    right: 18px;
+    top: 2px;
+}
+
+div.spanComment {
+    float: right;
+    font-size: .8rem;
+    font-weight: 300;
+}
+
+div.npButtons {
+    display: flex;
+    width: 118px !important;
+    height: 56px;
+    position: relative;
+    left: 362px;
+    top: -24px;
+    z-index: 1;
+}
+
+table#tButtons {
+    table-layout: fixed;
+    border-collapse: collapse;
+    margin: 0;
+    padding: 0;
+    width: 118px;
+    height: 66px;
+    position: relative;
+    right: 1px;
+    top: -1px;
+}
+
+td.tdarw {
+    margin: 2px 0 0 0;
+    vertical-align:text-bottom;
+    height: 66px !important;
+}
+
+div.tddL {
+    border-left: 1px solid rgba(150,150,150, .5);
+    border-top: 1px solid rgba(150,150,150, .5);
+    border-bottom: 1px solid rgba(150,150,150, .5);
+    width: 58px !important;
+    height: 100%;
+    align-items:baseline;
+    cursor: pointer;
+}
+
+div.tddR {
+    border: 1px solid rgba(150,150,150, .5);
+    width: 57px !important;
+    height: 100%;
+    align-items: center;
+    cursor: pointer;
+}
+
+span.wd {
+    font-family: 'Wingdings 3';
+    font-size: 1.7rem;
+    font-weight: 700;
+    justify-content: center;
+    vertical-align: middle;
+    margin-left: 15px;
+    position: relative;
+    top: 9px;
+    left: 2px;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -webkit-touch-callout : none;
+    -moz-user-select: none;
+    -o-user-select: none;
+    user-select: none;
+}
+
+.tddL, .tddR {
+    background-color: white !important;
+}
+
+.tddL:hover, 
+.tddR:hover {
+    background-color: rgb(179, 218, 235) !important;
+}
+
+.tddL:active, 
+.tddR:active {
+    background-color: #007aaa !important;
+    color: white;
+}
+
+.active {
+    background-color: #007aaa !important;
+    color: white;
+}
+
+td.borderTD {
+    width: 1px !important;
+    background-color: green;
+    height: 100%;
+}
+
+
+div.small {
+    text-align: center;
+    font-size: .7rem;
+}
+
+.slider_sw.disabled {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #D0D0D0;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+.slider_sw {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #007DAE;
+    -webkit-transition: .2s;
+    transition: .2s;
+    color: transparent;
+}
+  
+.slider_sw:before {
+    position: absolute;
+    content: '';
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+/* #70AD47 */
+input:checked + .slider_sw {
+    background-color: #007DAE;
+}
+  
+input:checked + .slider_sw:before {
+    -webkit-transform: translateX(12px);
+    -ms-transform: translateX(12px);
+    transform: translateX(12px);
+}
+  
+/* for the rounded slider */
+.slider_sw.round {
+    border-radius: 65px;
+}
+
+.slider_sw.round:before {
+    border-radius: 60%;
+}
+/*E: Track changes switch */
+
+#tc span.vDate{
+    font-size: .75rem; 
+    font-weight: normal;
+    font-style:oblique;
+}
+
+/*S: Track changes navigation */
+div#main {
+    position: relative;
+}
+
+span.posTop {
+    position: absolute;
+}
+
+div.tcNavigationPane {
+    flex-direction: row;
+    position: absolute;
+    width: 100%;
+    height: 90px;
+    right: 0px;
+    background-color: rgba(255, 255, 252, 1);
+    border: 1px solid rgba(166,166,166, .75);
+    visibility: hidden;
+    display: block;
+    cursor: default;
+    padding: 0;
+    z-index: 10;
+    -webkit-box-shadow: 0 0 10px #666;
+    box-shadow: 0 0 10px #666;
+}
+
+div.npHeader {
+    padding-top: 5px;
+    margin-left: 20px;
+    width: 500px;
+    position: relative;
+}
+
+span.npTitle {
+    font-size: 1.35rem;
+    font-weight: bold;
+    width: 220px;
+}
+
+span.npDate {
+    font-size: .85rem;
+    margin-left: 12px;
+    margin-bottom: 2px;
+}
+
+div.npClose {
+    display: block;  
+    width: 24px !important;
+    height:24px !important;
+    overflow: hidden;
+    background-color: transparent;
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    border: 1px solid transparent;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: all 150ms ease;
+    z-index: 10;
+}
+
+div.npClose div {
+    padding: 2px 1px 0 2px;
+}
+
+div.npClose:hover {
+    transform: scale(1.35);
+}
+
+span.npComment1 {
+    font-size: .7rem;
+    font-weight: 300;
+}
+
+span.npComment2 {
+    font-size: .7rem;
+    font-weight: 300;
+    position: relative;
+    top: -3px;
+}
+
+div.npNav {
+    width: 600px;
+    height: 56px;
+    position: absolute;
+    top: 18px;
+    right: 250px;
+}
+
+div.npSlider {
+    position: relative;
+    top: 10px;
+    left: 30px;
+}
+
+.npSwitch {
+    position: relative;
+    display: inline-block;
+    width: 37px;
+    height: 24px;
+    right: 4px;
+    z-index: 2;
+}
+  
+.npSwitch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+/*E: Track changes navigation */
+.tcBox {
+    border: 2px solid rgb(0, 0, 0) !important;
+    border-radius: 4px;
+}
+
+.tcBox::-moz-focus-outer {
+    border: 2px solid rgb(0, 0, 0) !important;
+    border-radius: 4px;
+}
+
+div#fieldDataMerger {
+    display: none;
+}
+
+/*S: navigation pane slider */
+
+.slider_np.disabled {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #D0D0D0;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+
+.slider_np {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #007DAE;
+    -webkit-transition: .2s;
+    transition: .2s;
+}
+  
+.slider_np:before {
+    position: absolute;
+    content: "";
+    height: 16px;
+    width: 16px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .2s;
+    transition: .2s;
+    color: transparent;
+}
+/* #70AD47 */
+input:checked + .slider_np {
+    background-color: #007DAE;
+}
+  
+input:checked + .slider_np:before {
+    -webkit-transform: translateX(12px);
+    -ms-transform: translateX(12px);
+    transform: translateX(12px);
+}
+  
+/* for the rounded slider */
+.slider_np.round {
+    border-radius: 65px;
+}
+
+.slider_np.round:before {
+    border-radius: 60%;
+}
+
+/*E: navigation pane slider */
+
+@media only screen and (max-width: 1360px) {
+    div.tcNavigationPane {
+        height: 90px !important;
+    }
+    
+    div.npSlider {
+        position: relative;
+        top: 10px;
+        width: 220px !important; 
+        left: 40px;
+        border: 1px dotted transparent;
+    }
+
+    div.npNav {
+        width: 240px;
+        height: 56px;
+        position: absolute;
+        top: 18px;
+        right: 340px;
+    }
+}
+
+@media only screen and (max-width: 1075px) {
+    div.tcNavigationPane {
+        height: 90px !important;
+    }
+
+    div.npSlider {
+        position: relative;
+        top: 10px;
+        width: 220px !important; 
+        left: 100px;
+        border: 1px dotted transparent;
+    }
+
+    div.npHeader {
+        padding-top: 5px;
+        margin-left: 20px;
+        width: 280px;
+        position: relative;
+    }
+
+    span.npComment1 {
+        display: none;
+    }
+
+    span.npComment2 {
+        font-size: .7rem;
+        font-weight: 300;
+        position: relative;
+        top: -3px;
+        max-width: 140px !important;
+        border: 1px dotted transparent;
+        flex-wrap: wrap;
+    }
+
+    span.npDate {
+        font-size: .8rem;
+        margin-left: 8px;
+        margin-bottom: 2px;
+    }
+}
+
+@media only screen and (min-width: 1070px) {
+    #divSwitch span.tcSpanTitle {
+        font-size: 1rem;
+        font-weight: bold;
+        margin-right: 16px;
+    }
+}
+
+@media only screen and (max-width: 1040px) {
+    div.tcNavigationPane {
+        height: 90px !important;
+    }
+
+    div.spanComment {
+        float: right;
+        font-size: .7rem;
+        font-weight: 300;
+        text-align: right;
+        max-width: 250px !important;
+        border: 1px dotted transparent;
+    }
+
+    div#divSwitch {
+        position: absolute;
+        z-index: 10;
+        height: 60px;
+        width: 295px;
+    }
+}
+
+@media only screen and (max-width: 840px) {
+    div.tcNavigationPane {
+        height: 90px !important;
+    }
+
+    div.spanComment {
+        float: right;
+        font-size: .7rem;
+        font-weight: 300;
+        text-align: right;
+        max-width: 250px !important;
+        border: 1px dotted transparent;
+    }
+
+    div#divSwitch {
+        position: absolute;
+        z-index: 10;
+        height: 60px;
+        width: 295px;
+    } 
+}
+
+@media only screen and (max-width: 800px) {
+    div.tcNavigationPane {
+        height: 90px !important;
+    }
+
+    span.npSpanTitle {
+        font-size: .85rem;
+        font-weight: bold;
+        position: relative;
+        right: 14px;
+        top: 2px;
+    }
+
+    div.npSlider {
+        position: relative;
+        top: 10px;
+        width: 220px !important; 
+        left: 140px;
+        border: 1px dotted transparent;
+    }
+
+    div.npHeader {
+        padding-top: 5px;
+        margin-left: 20px;
+        width: 280px;
+        position: relative;
+    }
+
+    span.npComment1 {
+        display: none;
+    }
+
+    span.npComment2 {
+        font-size: .7rem;
+        font-weight: 300;
+        position: relative;
+        top: -3px;
+        max-width: 140px !important;
+        border: 1px dotted transparent;
+        flex-wrap: wrap;
+    }
+
+    span.npDate {
+        font-size: .8rem;
+        margin-left: 8px;
+        margin-bottom: 2px;
+    }
+
+    div.npClose {
+        display: block;  
+        width: 24px !important;
+        height:24px !important;
+        overflow: hidden;
+        background-color: transparent;
+        position: absolute;
+        top: 10px;
+        right: 8px;
+        border: 1px solid transparent;
+        border-radius: 24px;
+        cursor: pointer;
+        transition: all 150ms ease;
+        z-index: 10;
+    }
+}
+
+@media only screen and (max-width: 740px) {
+    div.tcNavigationPane {
+        display: flex;
+        flex-direction: column;
+        position: absolute;
+        width: 100%;
+        height: 180px !important;
+        justify-items: center;
+        background-color: white;
+    }
+
+    div.tcWrapper {
+        position: relative;
+        justify-items: center;
+        align-items: center;
+        border: 1px dotted transparent;
+        padding: 0;
+        margin: auto;
+    }
+
+    div.npHeader {
+        position: relative;
+        top: -16px;
+        margin: auto;
+    }
+
+    span.npComment2 {
+        top: 0px;
+        line-height: 6px !important;
+        max-height: 28px;
+    }
+
+    div.npNav {
+        position: relative;
+        justify-items: center;
+        margin: auto;
+        top: 0px;
+    }
+
+    div.npButtons {
+        position: relative;
+        top: -30px;
+    }
+
+    #tButtons {
+        position: absolute;
+        right: -90% !important;
+        top: 0px;
+    }
+
+    div.npSlider {
+        position: relative;
+        top: 4px;
+        width: 160px !important;
+    }
+
+    label.npSwitch {
+        position: relative;
+        left: 68%;
+        z-index: 2;
+    }
+
+    span.npSpanTitle {
+        position: relative;
+        flex-wrap: nowrap;
+        top: 32px;
+        left: 120% !important;
+        min-width: 300px !important;
+        font-size: .75rem;
+    }
+
+    div.npClose {
+        top: 12px;
+        right: 12px;
+    }
+}
+
+@media only screen and (max-width: 350px) {
+    div.npClose {
+        top: 12px;
+        right: 6px;
+    }
+}
