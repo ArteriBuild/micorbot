@@ -1,20 +1,23 @@
 import streamlit as st
-from transformers import T5ForConditionalGeneration, T5Tokenizer
 from duckduckgo_search import DDGS
-import torch
+import nltk
+from nltk.tokenize import sent_tokenize
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from collections import Counter
+import string
 import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Initialize T5 model and tokenizer
+# Download necessary NLTK data
 @st.cache_resource
-def load_model():
-    model = T5ForConditionalGeneration.from_pretrained('t5-small')
-    tokenizer = T5Tokenizer.from_pretrained('t5-small')
-    return model, tokenizer
+def download_nltk_data():
+    nltk.download('punkt')
+    nltk.download('stopwords')
 
-model, tokenizer = load_model()
+download_nltk_data()
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -24,35 +27,53 @@ if 'messages' not in st.session_state:
 def search_micor(query):
     try:
         with DDGS() as ddgs:
-            results = list(ddgs.text(f"{query} MICOR Australia exporting requirements", max_results=3))
+            results = list(ddgs.text(f"{query} MICOR Australia exporting requirements", max_results=5))
         return results
     except Exception as e:
         logging.error(f"Error performing search: {e}")
         return []
 
+def preprocess_text(text):
+    # Tokenize the text into words
+    tokens = word_tokenize(text.lower())
+    # Remove punctuation and stopwords
+    stop_words = set(stopwords.words('english'))
+    tokens = [word for word in tokens if word.isalnum() and word not in stop_words]
+    return tokens
+
+def extract_relevant_sentences(query, text):
+    query_tokens = set(preprocess_text(query))
+    sentences = sent_tokenize(text)
+    relevant_sentences = []
+    
+    for sentence in sentences:
+        sentence_tokens = set(preprocess_text(sentence))
+        if query_tokens.intersection(sentence_tokens):
+            relevant_sentences.append(sentence)
+    
+    return relevant_sentences
+
 def generate_response(query):
-    # Perform a search to get context
     search_results = search_micor(query)
+    if not search_results:
+        return "I'm sorry, but I couldn't find any relevant information for your query. Please try rephrasing your question or ask about a different topic related to MICOR or Australian export requirements."
     
-    # Prepare the context from search results
-    context = "\n".join([f"Title: {result['title']}\nContent: {result['body']}" for result in search_results])
+    all_text = " ".join([result['body'] for result in search_results])
+    relevant_sentences = extract_relevant_sentences(query, all_text)
     
-    # Prepare the input for T5
-    input_text = f"question: {query} context: {context}"
+    if not relevant_sentences:
+        return "I found some information, but it doesn't seem to directly answer your question. Here's a summary of what I found:\n\n" + "\n\n".join([result['body'] for result in search_results[:2]])
     
-    # Tokenize and generate
-    input_ids = tokenizer.encode(input_text, return_tensors="pt", max_length=512, truncation=True)
+    response = "Based on the information I found, here's what I can tell you:\n\n"
+    response += " ".join(relevant_sentences[:5])  # Limit to first 5 relevant sentences
     
-    try:
-        with torch.no_grad():
-            outputs = model.generate(input_ids, max_length=150, num_return_sequences=1, no_repeat_ngram_size=2)
-        
-        answer = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        
-        return f"{answer}\n\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
-    except Exception as e:
-        logging.error(f"Error generating response: {e}")
-        return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
+    response += "\n\nHere are some sources for more information:\n"
+    for result in search_results[:3]:
+        response += f"- {result['title']}: {result['href']}\n"
+    
+    response += "\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
+    
+    return response
 
 # Streamlit UI
 st.title("MicorBot - Australian Export Requirements Assistant")
