@@ -1,11 +1,8 @@
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
+from duckduckgo_search import DDGS
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 import logging
 
 # Set up logging
@@ -28,77 +25,47 @@ download_nltk_data()
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-# Cache the fetched data
-@st.cache_data
-def fetch_micor_data():
-    url = "https://web.archive.org/web/20230830061021/https://micor.agriculture.gov.au/Pages/default.aspx"
+@st.cache_data(ttl=3600)  # Cache for 1 hour
+def search_micor(query):
     try:
-        response = requests.get(url, timeout=10)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
-        soup = BeautifulSoup(response.content, 'html.parser')
-        
-        # Extract relevant information from the page
-        main_content = soup.find('div', {'id': 'ctl00_PlaceHolderMain_ctl00__ControlWrapper_RichHtmlField'})
-        
-        if main_content:
-            paragraphs = main_content.find_all('p')
-            data = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
-            if not data:
-                logging.warning("No paragraphs found in the main content.")
-                return ["No content found. The page structure might have changed."]
-        else:
-            logging.warning("Main content div not found.")
-            return ["Unable to locate the main content on the page."]
-        
-        return data
-    except requests.RequestException as e:
-        logging.error(f"Error fetching data: {e}")
-        return [f"Error fetching MICOR data: {e}"]
-
-# Fetch MICOR data
-micor_data = fetch_micor_data()
+        with DDGS() as ddgs:
+            results = list(ddgs.text(f"{query} MICOR Australia importing requirements", max_results=5))
+        return results
+    except Exception as e:
+        logging.error(f"Error performing search: {e}")
+        return []
 
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
     stop_words = set(stopwords.words('english'))
     return ' '.join([word for word in tokens if word.isalnum() and word not in stop_words])
 
-def get_most_relevant_content(query, content, top_n=3):
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform([query] + content)
-    cosine_similarities = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:]).flatten()
-    related_docs_indices = cosine_similarities.argsort()[:-top_n-1:-1]
-    return [content[i] for i in related_docs_indices]
-
 def generate_response(query):
-    if len(micor_data) == 1 and micor_data[0].startswith("Error fetching MICOR data"):
-        return micor_data[0] + " Please try again later or contact support if the problem persists."
+    search_results = search_micor(query)
     
-    relevant_content = get_most_relevant_content(query, micor_data)
-    if not relevant_content:
-        return "I'm sorry, I couldn't find any relevant information for your query. Please try asking about general MICOR information or rephrase your question."
+    if not search_results:
+        return "I'm sorry, I couldn't find any relevant information for your query. Please try rephrasing your question or asking about a different aspect of MICOR or Australian importing requirements."
     
-    response = "Here's what I found based on your query:\n\n"
-    for i, content in enumerate(relevant_content, 1):
-        response += f"{i}. {content}\n\n"
-    response += "\nPlease note that this information is based on an archived version of the MICOR website from August 30, 2023. For the most up-to-date and comprehensive information, please visit the official MICOR website."
+    response = "Here's what I found based on your query about MICOR and Australian importing requirements:\n\n"
+    for i, result in enumerate(search_results, 1):
+        response += f"{i}. {result['title']}\n"
+        response += f"   {result['body']}\n"
+        response += f"   Source: {result['href']}\n\n"
+    
+    response += "\nPlease note that while I strive to provide accurate information, always verify with the official MICOR website or Australian government sources for the most up-to-date and comprehensive information on importing requirements."
     return response
 
 # Streamlit UI
-st.title("MicorBot - Chat about MICOR")
+st.title("MicorBot - Chat about MICOR and Australian Importing Requirements")
 
-st.info("This app provides information based on an archived version of the MICOR website from August 30, 2023. While we strive for accuracy, always verify with the official MICOR website for the most current information.")
-
-# Display a warning if there was an error fetching data
-if len(micor_data) == 1 and micor_data[0].startswith("Error fetching MICOR data"):
-    st.warning(micor_data[0])
+st.info("This app provides information about MICOR (Manual of Importing Country Requirements) and Australian importing requirements based on internet searches. Always verify information with official sources.")
 
 # Chat interface
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Ask a question about MICOR"):
+if prompt := st.chat_input("Ask a question about MICOR or Australian importing requirements"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
@@ -111,7 +78,7 @@ if prompt := st.chat_input("Ask a question about MICOR"):
         st.markdown(response)
     st.session_state.messages.append({"role": "assistant", "content": response})
 
-# Add a button to manually refresh the data
-if st.button("Refresh MICOR Data"):
-    st.cache_data.clear()
+# Add a button to clear the chat history
+if st.button("Clear Chat History"):
+    st.session_state.messages = []
     st.experimental_rerun()
