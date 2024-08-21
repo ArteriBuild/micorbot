@@ -18,7 +18,7 @@ if 'messages' not in st.session_state:
 def search_australian_exports(query):
     try:
         with DDGS() as ddgs:
-            results = list(ddgs.text(f"{query} Australia export requirements regulations", max_results=5))
+            results = list(ddgs.text(f"{query} Australia export", max_results=3))
         return results
     except Exception as e:
         logging.error(f"Error performing search: {e}")
@@ -27,22 +27,19 @@ def search_australian_exports(query):
 def generate_response(query):
     search_results = search_australian_exports(query)
     
-    if not search_results:
-        return "I'm sorry, but I couldn't find any relevant information for your query. Please try rephrasing your question or ask about a different topic related to Australian exports or regulations."
-    
-    context = "\n".join([f"Title: {result['title']}\nContent: {result['body']}" for result in search_results])
+    context = "Recent search results (use if relevant):\n" + "\n".join([f"- {result['title']}" for result in search_results])
     
     prompt = f"""You are an AI assistant specializing in Australian exports, trade regulations, and related topics. 
-    Use the following context and your knowledge to answer the user's question. Focus on providing information specific to Australia.
-    If the information is not in the context, use your general knowledge about Australian exports and regulations.
-    Always strive to provide specific, accurate information, but also mention when information might not be up-to-date or if official verification is recommended.
+    Answer the user's question about Australian exports or regulations. Use your knowledge to provide accurate and up-to-date information.
+    If you don't have specific information, provide general guidance and suggest reliable sources for more details.
+    Always focus on Australian context in your answers.
 
-    Context:
+    Recent context (use only if directly relevant):
     {context}
 
     User question: {query}
 
-    Please provide a direct and specific answer to the user's question, focusing on Australian context and information."""
+    Please provide a direct, informative answer to the user's question, focusing on Australian context and information."""
 
     try:
         response = model.generate_content(prompt)
