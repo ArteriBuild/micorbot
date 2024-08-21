@@ -1,199 +1,116 @@
 import streamlit as st
-import pdfplumber
-import os
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-from PIL import Image
-import numpy as np
+import google.generativeai as genai
+from bs4 import BeautifulSoup
+import requests
+import re
 
-# Streamlit configuration
-st.set_page_config(page_title="DAFF Policy Impact Analyzer", layout="wide")
+# Set up logging
+import logging
+logging.basicConfig(level=logging.INFO)
 
-# DAFF context information
-DAFF_CONTEXT = """
-The Department of Agriculture, Fisheries and Forestry (DAFF) is responsible for:
+# Initialize Gemini API
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-pro')
 
-1. Agricultural policy: Developing and implementing policies to support the productivity, profitability, and sustainability of Australia's agricultural, fisheries, and forestry industries.
+# MICOR demo website URL
+BASE_URL = "https://arteribuild.github.io/micordemo/micor.agriculture.gov.au/"
 
-2. Biosecurity: Protecting Australia's animal and plant health status to maintain overseas markets and protect the economy and environment from pests and diseases.
+# Initialize session state
+if 'messages' not in st.session_state:
+    st.session_state.messages = []
 
-3. Exports: Supporting agricultural and food exports, including through trade negotiations and market access.
+@st.cache_data(ttl=3600)
+def get_micor_pages():
+    pages = [
+        "Pages/default.html",
+        "Plants/default.html",
+        "Plants/Fruit/default.html",
+        "Plants/Fruit/Fresh/default.html",
+        "Plants/Grain/default.html",
+        "Plants/Horticulture/default.html",
+        "Plants/Seeds/default.html",
+    ]
+    return pages
 
-4. Research and innovation: Promoting and funding research, development, and extension in agriculture, fisheries, and forestry.
-
-5. Natural resource management: Developing policies for sustainable management of Australia's natural resources in relation to agriculture.
-
-6. Drought and rural support: Providing assistance to farmers and rural communities affected by drought and other challenges.
-
-7. Fisheries management: Ensuring the sustainable use of Australia's fisheries resources.
-
-8. Forestry: Supporting the sustainable management and use of Australia's forest resources.
-
-Key priorities include:
-- Driving innovation and productivity in the agriculture sector
-- Strengthening Australia's biosecurity system
-- Supporting farmers and rural communities
-- Expanding agricultural trade and market access
-- Promoting sustainable agriculture and natural resource management
-- Developing digital agriculture capabilities
-- Managing fisheries for long-term sustainability
-"""
-
-# Sample policy text
-SAMPLE_POLICY = """
-Proposed Policy: Sustainable Agricultural Development and Digital Innovation Initiative
-
-Our policy aims to modernize and sustain Australia's agricultural sector through the following key initiatives:
-
-1. Digital Transformation in Agriculture:
-   - Implement a nationwide program to provide high-speed internet access to all rural and remote farming communities.
-   - Develop and promote the use of AI-driven farm management systems to optimize crop yields and resource usage.
-   - Establish a national agricultural data platform to facilitate information sharing and decision-making among farmers, researchers, and policymakers.
-
-2. Biosecurity Measures:
-   - Enhance border control measures to prevent the introduction of invasive species and diseases.
-   - Allocate funds for research into new detection technologies for potential biosecurity threats.
-   - Conduct regular biosecurity awareness campaigns for farmers and the general public.
-
-3. Sustainable Farming Practices:
-   - Introduce incentives for farmers adopting regenerative agriculture techniques.
-   - Promote crop diversification and rotation to improve soil health and reduce pest pressures.
-   - Encourage the use of precision agriculture technologies to minimize water usage and chemical inputs.
-
-4. Climate Resilience in Agriculture:
-   - Develop climate-resistant crop varieties through increased funding for agricultural research.
-   - Implement a carbon credit system for farmers who adopt practices that sequester carbon in soil.
-   - Establish regional climate adaptation plans for different agricultural zones across Australia.
-
-5. Pacific Region Collaboration:
-   - Share agricultural best practices and technologies with Pacific Island nations to enhance their food security.
-   - Collaborate on regional biosecurity initiatives to protect shared ecosystems.
-   - Provide training and resources to Pacific farmers on sustainable and climate-smart agriculture techniques.
-
-6. Biodiversity and Wildlife Conservation:
-   - Create wildlife corridors in agricultural landscapes to support native species movement.
-   - Implement a grant program for farmers who protect and restore native habitats on their properties.
-   - Develop guidelines for wildlife-friendly farming practices, particularly in areas adjacent to protected habitats.
-
-This policy seeks to balance technological advancement, environmental sustainability, and regional cooperation to ensure a resilient and productive agricultural sector for Australia's future.
-"""
-
-def extract_text_from_pdf(pdf_path):
-    with pdfplumber.open(pdf_path) as pdf:
-        return " ".join(page.extract_text() for page in pdf.pages)
-
-def compare_policy_to_document(policy_text, document_text):
-    vectorizer = TfidfVectorizer(stop_words='english', ngram_range=(1,2), max_features=1000)
-    tfidf_matrix = vectorizer.fit_transform([policy_text, document_text])
-    similarity = cosine_similarity(tfidf_matrix[0:1], tfidf_matrix[1:2])[0][0]
-    
-    feature_names = vectorizer.get_feature_names_out()
-    policy_tfidf = tfidf_matrix[0].toarray()[0]
-    doc_tfidf = tfidf_matrix[1].toarray()[0]
-    
-    top_policy_terms = [feature_names[i] for i in policy_tfidf.argsort()[-20:][::-1]]
-    top_doc_terms = [feature_names[i] for i in doc_tfidf.argsort()[-20:][::-1]]
-    
-    common_terms = set(top_policy_terms) & set(top_doc_terms)
-    
-    return similarity, list(common_terms), top_policy_terms, top_doc_terms
-
-def generate_impact_description(similarity, common_terms):
-    if similarity > 0.3:
-        impact_level = "High Alignment"
-        description = "The proposed policy shows strong alignment with DAFF priorities and strategies."
-    elif similarity > 0.2:
-        impact_level = "Moderate Alignment"
-        description = "The proposed policy shows notable alignment with some DAFF priorities and strategies."
-    elif similarity > 0.1:
-        impact_level = "Low Alignment"
-        description = "The proposed policy shows some alignment with DAFF priorities and strategies, but there are significant differences."
+def fetch_page_content(page_url):
+    full_url = BASE_URL + page_url
+    response = requests.get(full_url)
+    if response.status_code == 200:
+        return response.text
     else:
-        impact_level = "Minimal Alignment"
-        description = "The proposed policy shows little alignment with current DAFF priorities and strategies."
+        logging.error(f"Failed to fetch {full_url}: {response.status_code}")
+        return None
 
-    if common_terms:
-        description += f" Key areas of potential alignment include: {', '.join(common_terms)}."
-    else:
-        description += " No specific areas of alignment were identified."
-
-    description += " Consider how this alignment (or lack thereof) impacts the policy's effectiveness and comprehensiveness in the context of DAFF's responsibilities."
+def search_micor_website(query):
+    relevant_content = []
+    pages = get_micor_pages()
     
-    return impact_level, description
-
-def generate_impact_report(policy_text, document_similarities):
-    report = "DAFF Policy Impact Analysis Report\n\n"
-    report += f"Policy Text: {policy_text[:200]}...\n\n"
-    report += "Impact on DAFF Priorities and Strategies:\n"
-    for doc, (similarity, common_terms, top_policy_terms, top_doc_terms) in document_similarities.items():
-        impact_level, impact_description = generate_impact_description(similarity, common_terms)
-        report += f"- {doc}:\n"
-        report += f"  Impact Level: {impact_level}\n"
-        report += f"  Similarity Score: {similarity:.2f}\n"
-        report += f"  Description: {impact_description}\n"
-        report += f"  Key Aligned Terms: {', '.join(common_terms)}\n"
-        report += f"  Top Policy Terms: {', '.join(top_policy_terms[:10])}\n"
-        report += f"  Top DAFF Priority Terms: {', '.join(top_doc_terms[:10])}\n\n"
-    return report
-
-def main():
-    logo = Image.open("logo.png")
-    st.image(logo, width=200)
+    for page in pages:
+        content = fetch_page_content(page)
+        if content:
+            soup = BeautifulSoup(content, 'html.parser')
+            text_content = soup.get_text()
+            
+            # Simple relevance check (can be improved)
+            if re.search(r'\b' + re.escape(query) + r'\b', text_content, re.IGNORECASE):
+                relevant_content.append({
+                    'title': soup.title.string if soup.title else page,
+                    'content': text_content[:500],  # First 500 characters as a preview
+                    'url': BASE_URL + page
+                })
     
-    st.title("Department of Agriculture, Fisheries and Forestry (DAFF) Policy Impact Analyzer")
+    return relevant_content[:3]  # Return top 3 most relevant results
 
-    st.write("""
-    Welcome to the DAFF Policy Impact Analyzer!
-
-    This app analyzes the potential impact of a proposed policy on key priorities and strategies 
-    of the Department of Agriculture, Fisheries and Forestry.
-
-    Here's how it works:
-    1. Review the DAFF context information.
-    2. Enter your proposed policy text or use the sample policy.
-    3. The app compares your policy to DAFF's priorities and strategies using natural language processing.
-    4. An impact report is generated, showing how your policy might align with DAFF's focus areas.
-
-    Let's get started!
-    """)
-
-    st.subheader("DAFF Context Information")
-    st.write(DAFF_CONTEXT)
-
-    st.subheader("Policy Analysis")
-    st.write("You can use our sample policy or enter your own:")
+def generate_response(query):
+    search_results = search_micor_website(query)
     
-    if st.button("Use Sample Policy"):
-        st.session_state.policy_text = SAMPLE_POLICY
+    context = "Relevant information from MICOR:\n" + "\n".join([f"- {result['title']}: {result['content']}" for result in search_results])
     
-    policy_text = st.text_area("Enter your proposed policy text here:", value=st.session_state.get('policy_text', ''), height=300)
+    prompt = f"""You are an AI assistant specializing in the Manual of Importing Country Requirements (MICOR) for Australian exports. 
+    Use the following context from MICOR to answer the user's question. Focus on providing accurate information about exporting plants and plant products from Australia.
+    If the context doesn't contain relevant information, use your general knowledge about MICOR and Australian export requirements.
+    Always strive to provide specific, accurate information, but also mention when information might not be up-to-date or if official verification is recommended.
 
-    if st.button("Analyze Policy"):
-        if policy_text:
-            with st.spinner("Analyzing policy impact..."):
-                similarity, common_terms, top_policy_terms, top_doc_terms = compare_policy_to_document(policy_text, DAFF_CONTEXT)
-                document_similarities = {"DAFF Priorities and Strategies": (similarity, common_terms, top_policy_terms, top_doc_terms)}
-                
-                report = generate_impact_report(policy_text, document_similarities)
-                st.text_area("Impact Report", report, height=400)
-                
-                # Visualization of impact
-                st.subheader("Impact Visualization")
-                st.write("DAFF Priorities and Strategies:")
-                st.progress(similarity)
-                impact_level, _ = generate_impact_description(similarity, common_terms)
-                st.write(f"Impact Level: {impact_level}")
-                st.write(f"Key Aligned Terms: {', '.join(common_terms)}")
-                st.write(f"Top Policy Terms: {', '.join(top_policy_terms[:10])}")
-                st.write(f"Top DAFF Priority Terms: {', '.join(top_doc_terms[:10])}")
-        else:
-            st.warning("Please enter policy text to analyze.")
+    Context:
+    {context}
 
-    st.write("""
-    Note: This analysis uses natural language processing to compare your policy text with 
-    DAFF's priorities and strategies. The results should be interpreted as potential impacts 
-    and used as a starting point for further, more detailed analysis by domain experts.
-    """)
+    User question: {query}
 
-if __name__ == "__main__":
-    main()
+    Please provide a direct and specific answer to the user's question, focusing on MICOR and Australian export requirements."""
+
+    try:
+        response = model.generate_content(prompt)
+        answer = response.text
+        return answer + "\n\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website for the most up-to-date and comprehensive export requirements."
+    except Exception as e:
+        logging.error(f"Error generating response: {e}")
+        return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
+
+# Streamlit UI
+st.title("MicorBot - Australian Export Requirements Assistant")
+
+st.info("This app provides information about the Manual of Importing Country Requirements (MICOR) for Australian exports. Always verify information with the official MICOR website.")
+
+# Chat interface
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+if prompt := st.chat_input("Ask about MICOR or Australian export requirements"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Generate response
+    with st.spinner("Generating response..."):
+        response = generate_response(prompt)
+
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        st.markdown(response)
+    st.session_state.messages.append({"role": "assistant", "content": response})
+
+# Add a button to clear the chat history
+if st.button("Clear Chat History"):
+    st.session_state.messages = []
+    st.experimental_rerun()
