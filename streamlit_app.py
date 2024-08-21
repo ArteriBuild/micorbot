@@ -35,6 +35,7 @@ def read_html_file(file_path):
 
 def create_index(html_dir):
     index = {}
+    file_contents = {}
     for filename in os.listdir(html_dir):
         if filename.endswith('.html'):
             file_path = os.path.join(html_dir, filename)
@@ -46,7 +47,8 @@ def create_index(html_dir):
                 if word not in index:
                     index[word] = set()
                 index[word].add(filename)
-    return index
+            file_contents[filename] = text[:1000]  # Store first 1000 characters for debugging
+    return index, file_contents
 
 @st.cache_resource
 def load_or_create_index():
@@ -54,41 +56,42 @@ def load_or_create_index():
         with open(INDEX_FILE, 'rb') as f:
             return pickle.load(f)
     else:
-        index = create_index(HTML_DIR)
+        index, file_contents = create_index(HTML_DIR)
         with open(INDEX_FILE, 'wb') as f:
-            pickle.dump(index, f)
-        return index
+            pickle.dump((index, file_contents), f)
+        return index, file_contents
 
-def search_micor_content(query, index):
+def search_micor_content(query, index, file_contents):
     query_words = set(re.findall(r'\w+', query.lower()))
     relevant_files = set.union(*[index.get(word, set()) for word in query_words])
     
     relevant_content = []
     for filename in relevant_files:
-        file_path = os.path.join(HTML_DIR, filename)
-        content = read_html_file(file_path)
-        soup = BeautifulSoup(content, 'html.parser')
-        text_content = soup.get_text()
+        text_content = file_contents.get(filename, '')
         
-        if any(word in text_content.lower() for word in query_words):
+        if any(word in text_content for word in query_words):
             relevant_content.append({
-                'title': soup.title.string if soup.title else filename,
-                'content': text_content[:1000],  # Increased to 1000 characters for more context
+                'title': filename,
+                'content': text_content,
                 'file': filename
             })
     
     return relevant_content
 
-def generate_response(query, index):
-    search_results = search_micor_content(query, index)
+def generate_response(query, index, file_contents):
+    search_results = search_micor_content(query, index, file_contents)
     
     # Debugging information
     st.sidebar.write("Debug Information:")
     st.sidebar.write(f"Query: {query}")
     st.sidebar.write(f"Number of relevant files found: {len(search_results)}")
+    st.sidebar.write(f"Total files in index: {len(file_contents)}")
+    st.sidebar.write("Files in index:")
+    for filename in file_contents.keys():
+        st.sidebar.write(f"- {filename}")
+    st.sidebar.write("---")
     for result in search_results:
         st.sidebar.write(f"File: {result['file']}")
-        st.sidebar.write(f"Title: {result['title']}")
         st.sidebar.write(f"Content preview: {result['content'][:100]}...")
         st.sidebar.write("---")
     
@@ -126,7 +129,7 @@ def generate_response(query, index):
         return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
 
 # Load or create the index
-index = load_or_create_index()
+index, file_contents = load_or_create_index()
 
 # Streamlit UI
 st.title("MicorBot - Australian Export Requirements Assistant")
@@ -145,7 +148,7 @@ if prompt := st.chat_input("Ask about MICOR or Australian export requirements"):
 
     # Generate response
     with st.spinner("Generating response..."):
-        response = generate_response(prompt, index)
+        response = generate_response(prompt, index, file_contents)
 
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
