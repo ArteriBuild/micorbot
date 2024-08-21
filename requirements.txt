@@ -4,3 +4,5 @@ torch
 sentencepiece
 duckduckgo_search
 nltk
+requests
+beautifulsoup4

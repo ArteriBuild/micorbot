@@ -1,7 +1,10 @@
 import streamlit as st
 from duckduckgo_search import DDGS
+import requests
+from bs4 import BeautifulSoup
 import string
 import re
+from collections import Counter
 import logging
 
 # Set up logging
@@ -47,25 +50,54 @@ def extract_relevant_sentences(query, text):
     
     return relevant_sentences
 
+def scrape_content(url):
+    try:
+        response = requests.get(url, timeout=10)
+        soup = BeautifulSoup(response.content, 'html.parser')
+        # Extract text from p, h1, h2, h3, li tags
+        text = ' '.join([tag.get_text() for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'li'])])
+        return text
+    except Exception as e:
+        logging.error(f"Error scraping content from {url}: {e}")
+        return ""
+
+def summarize_text(text, num_sentences=3):
+    # Simple extractive summarization
+    sentences = simple_sentence_tokenize(text)
+    words = preprocess_text(text)
+    word_frequencies = Counter(words)
+    
+    sentence_scores = {}
+    for sentence in sentences:
+        for word in preprocess_text(sentence):
+            if word in word_frequencies:
+                if sentence not in sentence_scores:
+                    sentence_scores[sentence] = 0
+                sentence_scores[sentence] += word_frequencies[word]
+    
+    summary_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
+    summary = ' '.join(summary_sentences)
+    return summary
+
 def generate_response(query):
     search_results = search_micor(query)
     if not search_results:
         return "I'm sorry, but I couldn't find any relevant information for your query. Please try rephrasing your question or ask about a different topic related to MICOR or Australian export requirements."
     
-    all_text = " ".join([result['body'] for result in search_results])
+    all_text = ""
+    for result in search_results[:3]:  # Limit to top 3 results to avoid long processing times
+        all_text += scrape_content(result['href']) + " "
+    
     relevant_sentences = extract_relevant_sentences(query, all_text)
     
     if not relevant_sentences:
-        return "I found some information, but it doesn't seem to directly answer your question. Here's a summary of what I found:\n\n" + "\n\n".join([result['body'] for result in search_results[:2]])
+        summary = summarize_text(all_text)
+        return f"I couldn't find a direct answer to your question, but here's a summary of related information I found:\n\n{summary}\n\nPlease note that this information might not directly address your specific query about {query}."
     
-    response = "Based on the information I found, here's what I can tell you:\n\n"
-    response += " ".join(relevant_sentences[:5])  # Limit to first 5 relevant sentences
+    summary = summarize_text(' '.join(relevant_sentences))
     
-    response += "\n\nHere are some sources for more information:\n"
-    for result in search_results[:3]:
-        response += f"- {result['title']}: {result['href']}\n"
-    
-    response += "\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
+    response = f"Based on the information I found, here's what I can tell you about {query}:\n\n{summary}\n\n"
+    response += "Please note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
     
     return response
 
@@ -85,7 +117,8 @@ if prompt := st.chat_input("Ask about Australian export requirements or MICOR"):
         st.markdown(prompt)
 
     # Generate response
-    response = generate_response(prompt)
+    with st.spinner("Searching for information..."):
+        response = generate_response(prompt)
 
     # Display assistant response in chat message container
     with st.chat_message("assistant"):
