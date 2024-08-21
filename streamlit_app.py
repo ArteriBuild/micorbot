@@ -1,14 +1,14 @@
 import streamlit as st
+import google.generativeai as genai
 from duckduckgo_search import DDGS
-import requests
-from bs4 import BeautifulSoup
-import string
-import re
-from collections import Counter
 import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
+
+# Initialize Gemini API
+genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+model = genai.GenerativeModel('gemini-pro')
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -24,82 +24,32 @@ def search_micor(query):
         logging.error(f"Error performing search: {e}")
         return []
 
-def preprocess_text(text):
-    # Convert to lowercase and remove punctuation
-    text = text.lower()
-    text = text.translate(str.maketrans("", "", string.punctuation))
-    # Split into words
-    words = text.split()
-    # Remove common English stop words
-    stop_words = set(['i', 'me', 'my', 'myself', 'we', 'our', 'ours', 'ourselves', 'you', "you're", "you've", "you'll", "you'd", 'your', 'yours', 'yourself', 'yourselves', 'he', 'him', 'his', 'himself', 'she', "she's", 'her', 'hers', 'herself', 'it', "it's", 'its', 'itself', 'they', 'them', 'their', 'theirs', 'themselves', 'what', 'which', 'who', 'whom', 'this', 'that', "that'll", 'these', 'those', 'am', 'is', 'are', 'was', 'were', 'be', 'been', 'being', 'have', 'has', 'had', 'having', 'do', 'does', 'did', 'doing', 'a', 'an', 'the', 'and', 'but', 'if', 'or', 'because', 'as', 'until', 'while', 'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through', 'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in', 'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here', 'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few', 'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own', 'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don', "don't", 'should', "should've", 'now', 'd', 'll', 'm', 'o', 're', 've', 'y', 'ain', 'aren', "aren't", 'couldn', "couldn't", 'didn', "didn't", 'doesn', "doesn't", 'hadn', "hadn't", 'hasn', "hasn't", 'haven', "haven't", 'isn', "isn't", 'ma', 'mightn', "mightn't", 'mustn', "mustn't", 'needn', "needn't", 'shan', "shan't", 'shouldn', "shouldn't", 'wasn', "wasn't", 'weren', "weren't", 'won', "won't", 'wouldn', "wouldn't"])
-    return [word for word in words if word not in stop_words]
-
-def simple_sentence_tokenize(text):
-    # Split text into sentences based on common sentence-ending punctuation
-    return re.split(r'(?<=[.!?])\s+', text)
-
-def extract_relevant_sentences(query, text):
-    query_tokens = set(preprocess_text(query))
-    sentences = simple_sentence_tokenize(text)
-    relevant_sentences = []
-    
-    for sentence in sentences:
-        sentence_tokens = set(preprocess_text(sentence))
-        if query_tokens.intersection(sentence_tokens):
-            relevant_sentences.append(sentence)
-    
-    return relevant_sentences
-
-def scrape_content(url):
-    try:
-        response = requests.get(url, timeout=10)
-        soup = BeautifulSoup(response.content, 'html.parser')
-        # Extract text from p, h1, h2, h3, li tags
-        text = ' '.join([tag.get_text() for tag in soup.find_all(['p', 'h1', 'h2', 'h3', 'li'])])
-        return text
-    except Exception as e:
-        logging.error(f"Error scraping content from {url}: {e}")
-        return ""
-
-def summarize_text(text, num_sentences=3):
-    # Simple extractive summarization
-    sentences = simple_sentence_tokenize(text)
-    words = preprocess_text(text)
-    word_frequencies = Counter(words)
-    
-    sentence_scores = {}
-    for sentence in sentences:
-        for word in preprocess_text(sentence):
-            if word in word_frequencies:
-                if sentence not in sentence_scores:
-                    sentence_scores[sentence] = 0
-                sentence_scores[sentence] += word_frequencies[word]
-    
-    summary_sentences = sorted(sentence_scores, key=sentence_scores.get, reverse=True)[:num_sentences]
-    summary = ' '.join(summary_sentences)
-    return summary
-
 def generate_response(query):
     search_results = search_micor(query)
+    
     if not search_results:
         return "I'm sorry, but I couldn't find any relevant information for your query. Please try rephrasing your question or ask about a different topic related to MICOR or Australian export requirements."
     
-    all_text = ""
-    for result in search_results[:3]:  # Limit to top 3 results to avoid long processing times
-        all_text += scrape_content(result['href']) + " "
+    context = "\n".join([f"Title: {result['title']}\nContent: {result['body']}" for result in search_results])
     
-    relevant_sentences = extract_relevant_sentences(query, all_text)
-    
-    if not relevant_sentences:
-        summary = summarize_text(all_text)
-        return f"I couldn't find a direct answer to your question, but here's a summary of related information I found:\n\n{summary}\n\nPlease note that this information might not directly address your specific query about {query}."
-    
-    summary = summarize_text(' '.join(relevant_sentences))
-    
-    response = f"Based on the information I found, here's what I can tell you about {query}:\n\n{summary}\n\n"
-    response += "Please note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
-    
-    return response
+    prompt = f"""You are an AI assistant specializing in Australian export requirements and the Manual of Importing Country Requirements (MICOR). 
+    Use the following context to answer the user's question. If the information is not in the context, use your general knowledge about MICOR and Australian export requirements.
+    Always strive to provide specific, accurate information, but also mention when information might not be up-to-date or if official verification is recommended.
+
+    Context:
+    {context}
+
+    User question: {query}
+
+    Please provide a direct and specific answer to the user's question."""
+
+    try:
+        response = model.generate_content(prompt)
+        answer = response.text
+        return answer + "\n\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
+    except Exception as e:
+        logging.error(f"Error generating response: {e}")
+        return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
 
 # Streamlit UI
 st.title("MicorBot - Australian Export Requirements Assistant")
@@ -117,7 +67,7 @@ if prompt := st.chat_input("Ask about Australian export requirements or MICOR"):
         st.markdown(prompt)
 
     # Generate response
-    with st.spinner("Searching for information..."):
+    with st.spinner("Generating response..."):
         response = generate_response(prompt)
 
     # Display assistant response in chat message container
