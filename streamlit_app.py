@@ -1,25 +1,13 @@
 import streamlit as st
+import openai
 from duckduckgo_search import DDGS
-import nltk
-from nltk.corpus import stopwords
-from nltk.tokenize import word_tokenize
 import logging
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
-# Function to download NLTK data
-@st.cache_resource
-def download_nltk_data():
-    try:
-        nltk.data.find('tokenizers/punkt')
-        nltk.data.find('corpora/stopwords')
-    except LookupError:
-        nltk.download('punkt')
-        nltk.download('stopwords')
-
-# Call the function to download NLTK data
-download_nltk_data()
+# Initialize OpenAI API
+openai.api_key = st.secrets["OPENAI_API_KEY"]
 
 # Initialize session state
 if 'messages' not in st.session_state:
@@ -29,43 +17,61 @@ if 'messages' not in st.session_state:
 def search_micor(query):
     try:
         with DDGS() as ddgs:
-            results = list(ddgs.text(f"{query} MICOR Australia importing requirements", max_results=5))
+            results = list(ddgs.text(f"{query} MICOR Australia exporting requirements", max_results=3))
         return results
     except Exception as e:
         logging.error(f"Error performing search: {e}")
         return []
 
-def preprocess_text(text):
-    tokens = word_tokenize(text.lower())
-    stop_words = set(stopwords.words('english'))
-    return ' '.join([word for word in tokens if word.isalnum() and word not in stop_words])
-
 def generate_response(query):
+    # Perform a search to get context
     search_results = search_micor(query)
     
-    if not search_results:
-        return "I'm sorry, I couldn't find any relevant information for your query. Please try rephrasing your question or asking about a different aspect of MICOR or Australian importing requirements."
+    # Prepare the context from search results
+    context = "\n".join([f"Title: {result['title']}\nContent: {result['body']}" for result in search_results])
     
-    response = "Here's what I found based on your query about MICOR and Australian importing requirements:\n\n"
-    for i, result in enumerate(search_results, 1):
-        response += f"{i}. {result['title']}\n"
-        response += f"   {result['body']}\n"
-        response += f"   Source: {result['href']}\n\n"
-    
-    response += "\nPlease note that while I strive to provide accurate information, always verify with the official MICOR website or Australian government sources for the most up-to-date and comprehensive information on importing requirements."
-    return response
+    # Prepare the prompt for GPT
+    prompt = f"""You are an AI assistant specializing in Australian export requirements and the Manual of Importing Country Requirements (MICOR). 
+    Use the following context to answer the user's question. If the information is not in the context, use your general knowledge about MICOR and Australian export requirements.
+    Always strive to provide specific, accurate information, but also mention when information might not be up-to-date or if official verification is recommended.
+
+    Context:
+    {context}
+
+    User question: {query}
+
+    Please provide a direct and specific answer to the user's question."""
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant that provides information about MICOR and Australian export requirements."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500,
+            n=1,
+            stop=None,
+            temperature=0.7,
+        )
+        
+        answer = response.choices[0].message['content'].strip()
+        return answer + "\n\nPlease note: While I strive to provide accurate information, always verify critical details with the official MICOR website or Australian government sources for the most up-to-date and comprehensive export requirements."
+    except Exception as e:
+        logging.error(f"Error generating response: {e}")
+        return "I apologize, but I encountered an error while generating a response. Please try asking your question again or rephrase it slightly."
 
 # Streamlit UI
-st.title("MicorBot - Chat about MICOR and Australian Importing Requirements")
+st.title("MicorBot - Australian Export Requirements Assistant")
 
-st.info("This app provides information about MICOR (Manual of Importing Country Requirements) and Australian importing requirements based on internet searches. Always verify information with official sources.")
+st.info("This app provides information about MICOR (Manual of Importing Country Requirements) and Australian export requirements. Always verify information with official sources.")
 
 # Chat interface
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if prompt := st.chat_input("Ask a question about MICOR or Australian importing requirements"):
+if prompt := st.chat_input("Ask about Australian export requirements or MICOR"):
     st.session_state.messages.append({"role": "user", "content": prompt})
     with st.chat_message("user"):
         st.markdown(prompt)
