@@ -1,13 +1,11 @@
-# streamlit_app.py
 import streamlit as st
-from bs4 import BeautifulSoup
 import requests
+from bs4 import BeautifulSoup
 import nltk
 from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-import numpy as np
 
 # Function to download NLTK data
 @st.cache_resource
@@ -26,15 +24,26 @@ download_nltk_data()
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-def fetch_website_content(url):
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raises an HTTPError for bad responses
-        soup = BeautifulSoup(response.content, 'html.parser')
-        return soup.get_text()
-    except requests.RequestException as e:
-        st.error(f"Error fetching website content: {e}")
-        return ""
+# Cache the fetched data
+@st.cache_data
+def fetch_micor_data():
+    url = "https://web.archive.org/web/20230830061021/https://micor.agriculture.gov.au/Pages/default.aspx"
+    response = requests.get(url)
+    soup = BeautifulSoup(response.content, 'html.parser')
+    
+    # Extract relevant information from the page
+    main_content = soup.find('div', {'id': 'ctl00_PlaceHolderMain_ctl00__ControlWrapper_RichHtmlField'})
+    
+    if main_content:
+        paragraphs = main_content.find_all('p')
+        data = [p.get_text(strip=True) for p in paragraphs if p.get_text(strip=True)]
+    else:
+        data = ["Unable to fetch MICOR data. Please check the source."]
+    
+    return data
+
+# Fetch MICOR data
+micor_data = fetch_micor_data()
 
 def preprocess_text(text):
     tokens = word_tokenize(text.lower())
@@ -48,39 +57,36 @@ def get_most_relevant_content(query, content, top_n=3):
     related_docs_indices = cosine_similarities.argsort()[:-top_n-1:-1]
     return [content[i] for i in related_docs_indices]
 
-def generate_response(query, relevant_content):
-    # In a real-world scenario, you would use a more sophisticated language model here
-    # For this example, we'll just return the most relevant content
-    return "\n\n".join(relevant_content)
+def generate_response(query):
+    relevant_content = get_most_relevant_content(query, micor_data)
+    if not relevant_content:
+        return "I'm sorry, I couldn't find any relevant information for your query. Please try asking about general MICOR information or rephrase your question."
+    
+    response = "Here's what I found based on your query:\n\n"
+    for i, content in enumerate(relevant_content, 1):
+        response += f"{i}. {content}\n\n"
+    response += "\nPlease note that this information is based on an archived version of the MICOR website from August 30, 2023. For the most up-to-date and comprehensive information, please visit the official MICOR website."
+    return response
 
 # Streamlit UI
-st.title("MicorBot - Chat with MICOR Website")
+st.title("MicorBot - Chat about MICOR")
 
-# Fetch and preprocess website content
-url = "https://micor.agriculture.gov.au/"
-raw_content = fetch_website_content(url)
+st.info("This app provides information based on an archived version of the MICOR website from August 30, 2023. While we strive for accuracy, always verify with the official MICOR website for the most current information.")
 
-if raw_content:
-    paragraphs = [p for p in raw_content.split('\n') if p.strip()]
-    processed_paragraphs = [preprocess_text(p) for p in paragraphs]
+# Chat interface
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-    # Chat interface
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+if prompt := st.chat_input("Ask a question about MICOR"):
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    with st.chat_message("user"):
+        st.markdown(prompt)
 
-    if prompt := st.chat_input("Ask a question about MICOR"):
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+    # Generate response
+    response = generate_response(prompt)
 
-        # Get relevant content and generate response
-        relevant_content = get_most_relevant_content(preprocess_text(prompt), processed_paragraphs)
-        response = generate_response(prompt, relevant_content)
-
-        # Display assistant response in chat message container
-        with st.chat_message("assistant"):
-            st.markdown(response)
-        st.session_state.messages.append({"role": "assistant", "content": response})
-else:
-    st.error("Failed to fetch website content. Please try again later.")
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        st.markdown(response)
+    st.session_state.messages.append({"role": "assistant", "content": response})
