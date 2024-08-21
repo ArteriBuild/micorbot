@@ -7,3 +7,4 @@ nltk
 requests
 beautifulsoup4
 google-generativeai
+pdfplumber
