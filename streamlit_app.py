@@ -1,9 +1,12 @@
 import streamlit as st
 import google.generativeai as genai
 from bs4 import BeautifulSoup
+import aiohttp
+import asyncio
 import re
-import os
+from urllib.parse import urljoin
 import pickle
+import os
 from datetime import datetime, timedelta
 
 # Set up logging
@@ -14,33 +17,65 @@ logging.basicConfig(level=logging.INFO)
 genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
 model = genai.GenerativeModel('gemini-pro')
 
-# Directory containing HTML files
-HTML_DIR = "micor_html"
-
-# File to store the index
-INDEX_FILE = "micor_index.pickle"
+# MICOR demo website URL
+BASE_URL = "https://arteribuild.github.io/micordemo/micor.agriculture.gov.au/"
 
 # Initialize session state
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-def read_html_file(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
-        return file.read()
+# File to store the index
+INDEX_FILE = "micor_index.pickle"
 
-def create_index(html_dir):
+async def fetch_page(session, url):
+    try:
+        async with session.get(url) as response:
+            if response.status == 200:
+                return await response.text()
+    except Exception as e:
+        logging.error(f"Error fetching {url}: {e}")
+    return None
+
+async def discover_micor_pages(base_url):
+    pages = set()
+    to_visit = [base_url]
+    visited = set()
+
+    async with aiohttp.ClientSession() as session:
+        while to_visit:
+            tasks = []
+            for _ in range(min(10, len(to_visit))):  # Process up to 10 pages concurrently
+                url = to_visit.pop(0)
+                if url not in visited:
+                    visited.add(url)
+                    tasks.append(asyncio.create_task(fetch_page(session, url)))
+
+            responses = await asyncio.gather(*tasks)
+
+            for url, content in zip(visited, responses):
+                if content:
+                    pages.add(url)
+                    soup = BeautifulSoup(content, 'html.parser')
+                    for link in soup.find_all('a', href=True):
+                        href = link['href']
+                        full_url = urljoin(url, href)
+                        if full_url.startswith(base_url) and full_url not in visited and full_url not in to_visit:
+                            to_visit.append(full_url)
+
+    return list(pages)
+
+def create_index(pages):
     index = {}
-    for filename in os.listdir(html_dir):
-        if filename.endswith('.html'):
-            file_path = os.path.join(html_dir, filename)
-            content = read_html_file(file_path)
+    for page in pages:
+        content = fetch_page_content(page)
+        if content:
             soup = BeautifulSoup(content, 'html.parser')
             text = soup.get_text().lower()
             words = set(re.findall(r'\w+', text))
             for word in words:
                 if word not in index:
                     index[word] = set()
-                index[word].add(filename)
+                index[word].add(page)
     return index
 
 @st.cache_resource
@@ -49,33 +84,43 @@ def load_or_create_index():
         with open(INDEX_FILE, 'rb') as f:
             return pickle.load(f)
     else:
-        index = create_index(HTML_DIR)
+        pages = asyncio.run(discover_micor_pages(BASE_URL))
+        index = create_index(pages)
         with open(INDEX_FILE, 'wb') as f:
             pickle.dump(index, f)
         return index
 
-def search_micor_content(query, index):
+def fetch_page_content(url):
+    try:
+        response = requests.get(url)
+        if response.status_code == 200:
+            return response.text
+    except Exception as e:
+        logging.error(f"Error fetching {url}: {e}")
+    return None
+
+def search_micor_website(query, index):
     query_words = set(re.findall(r'\w+', query.lower()))
-    relevant_files = set.union(*[index.get(word, set()) for word in query_words])
+    relevant_pages = set.union(*[index.get(word, set()) for word in query_words])
     
     relevant_content = []
-    for filename in relevant_files:
-        file_path = os.path.join(HTML_DIR, filename)
-        content = read_html_file(file_path)
-        soup = BeautifulSoup(content, 'html.parser')
-        text_content = soup.get_text()
-        
-        if any(word in text_content.lower() for word in query_words):
-            relevant_content.append({
-                'title': soup.title.string if soup.title else filename,
-                'content': text_content[:500],  # First 500 characters as a preview
-                'file': filename
-            })
+    for page_url in relevant_pages:
+        content = fetch_page_content(page_url)
+        if content:
+            soup = BeautifulSoup(content, 'html.parser')
+            text_content = soup.get_text()
+            
+            if any(word in text_content.lower() for word in query_words):
+                relevant_content.append({
+                    'title': soup.title.string if soup.title else page_url,
+                    'content': text_content[:500],  # First 500 characters as a preview
+                    'url': page_url
+                })
     
     return relevant_content[:3]  # Return top 3 most relevant results
 
 def generate_response(query, index):
-    search_results = search_micor_content(query, index)
+    search_results = search_micor_website(query, index)
     
     context = "Relevant information from MICOR:\n" + "\n".join([f"- {result['title']}: {result['content']}" for result in search_results])
     
